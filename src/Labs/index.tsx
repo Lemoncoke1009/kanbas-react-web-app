@@ -1,3 +1,4 @@
+
 import Lab1 from "./Lab1";
 import { Route, Routes, Navigate } from "react-router";
 import TOC from "./TOC";
@@ -7,6 +8,10 @@ export default function Labs() {
   return (
     <div>
       <h1>Labs</h1>
+      <h2>Yifan Zhu</h2>
+      <a href="https://github.com/Lemoncoke1009/kanbas-react-web-app" id="wd-github" target="_blank" rel="noreferrer">
+        My GitHub Repository
+      </a>
       <TOC />
       <Routes>
         <Route path="/" element={<Navigate to="Lab1" />} />

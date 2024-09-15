@@ -7,7 +7,7 @@ import Lab3 from "./Lab3";
 export default function Labs() {
   return (
     <div>
-      <h1>Labs</h1>
+      <h1>Labs CS5610</h1>
       <h2>Yifan Zhu</h2>
       <a href="https://github.com/Lemoncoke1009/kanbas-react-web-app" id="wd-github" target="_blank" rel="noreferrer">
         My GitHub Repository

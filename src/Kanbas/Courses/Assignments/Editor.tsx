@@ -8,12 +8,31 @@ export default function AssignmentEditor() {
       </div>
 
       <div className="mb-3">
-        <textarea id="wd-description" cols={60} rows={8} className="form-control">
-          The assignment is available online. Submit a link to the landing page of your Web application running on Netlify.
-          The landing page should include the following: Your full name and section, Links to each of the lab assignments,
-          Link to the Kanbas application, Links to all relevant source code repositories. The Kanbas application should
-          include a link to navigate back to the landing page.
-        </textarea>
+      <div className="form-control" id="wd-description">
+    <p>
+      The assignment is <span className="text-danger">available online</span>. </p>
+      <p>
+        Submit a link to the landing page of your Web application running on
+      <a href="https://www.netlify.com/" target="_blank" rel="noreferrer">
+        {" "}Netlify
+      </a>.
+    </p>
+    <p>The landing page should include the following:</p>
+    <ul>
+      <li>Your full name and section</li>
+      <li>Links to each of the lab assignments</li>
+      <li>
+        Link to the
+        <a href="#" target="_blank" rel="noreferrer"> Kanbas application</a>
+      </li>
+      <li>Links to all relevant source code repositories</li>
+    </ul>
+    <p>
+      The
+      <a href="#" target="_blank" rel="noreferrer"> Kanbas application</a>
+      should include a link to navigate back to the landing page.
+    </p>
+  </div>
       </div>
 
       {/* Points */}

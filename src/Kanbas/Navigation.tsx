@@ -12,7 +12,7 @@ export default function KanbasNavigation() {
       <a id="wd-neu-link" target="_blank" rel="noreferrer"
         href="https://www.northeastern.edu/"
         className="list-group-item bg-black border-0 text-center">
-        <img src="/images/NEU.png" width="75px" /></a>
+        <img src="/images/NEU.png" width="75px"   alt="Northeastern University logo" /></a>
       <Link to="/Kanbas/Account" id="wd-account-link"
         className="list-group-item text-center border-0 bg-black text-white">
         <FaRegCircleUser className="fs-1 text text-white" /><br />

@@ -4,7 +4,7 @@ import Home from "./Home";
 import Assignments from "./Assignments";
 import AssignmentEditor from "./Assignments/Editor";
 import PeopleTable from "./People/Table";
-import { Navigate, Route, Routes } from "react-router";
+import {  Route, Routes } from "react-router";
 import { FaAlignJustify } from "react-icons/fa";
 
 export default function Courses() {

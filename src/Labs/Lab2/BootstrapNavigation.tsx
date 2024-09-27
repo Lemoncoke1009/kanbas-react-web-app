@@ -19,7 +19,7 @@ export default function BootstrapNavigation() {
   <h2>Cards</h2>
   <div className="card"
        style={{ width: "18rem" }}>
-    <img src="images/stacked.jpg"
+    <img src="images/stacked.jpg" alt=""
          className="card-img-top" />
     <div className="card-body">
       <h5 className="card-title">

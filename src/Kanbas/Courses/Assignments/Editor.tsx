@@ -23,13 +23,13 @@ export default function AssignmentEditor() {
       <li>Links to each of the lab assignments</li>
       <li>
         Link to the
-        <a href="#" target="_blank" rel="noreferrer"> Kanbas application</a>
+        <a href="#https://www.netlify.com/" target="_blank" rel="noreferrer"> Kanbas application</a>
       </li>
       <li>Links to all relevant source code repositories</li>
     </ul>
     <p>
       The
-      <a href="#" target="_blank" rel="noreferrer"> Kanbas application</a>
+      <a href="https://www.netlify.com/" target="_blank" rel="noreferrer"> Kanbas application</a>
       should include a link to navigate back to the landing page.
     </p>
   </div>

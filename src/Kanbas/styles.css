@@ -37,3 +37,39 @@ body * {  font-family: Arial, Helvetica, sans-serif;  }
   border-left: 3px solid green !important;
 }
 
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body * {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.form-label {
+  font-weight: bold;
+}
+
+.btn-secondary {
+  --bs-btn-color: #000 !important;
+  --bs-btn-bg: #c7cdd1 !important;
+  --bs-btn-border-color: #c7cdd1 !important;
+  --bs-btn-hover-color: #fff !important;
+}
+
+.btn-danger {
+  --bs-btn-bg: #ff0000 !important;
+  --bs-btn-color: #fff !important;
+}
+
+.form-control {
+  width: 100%;
+}
+
+.form-check-input {
+  margin-left: 0;
+}
+
+.form-check-label {
+  margin-left: 5px;
+}

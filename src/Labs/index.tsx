@@ -14,7 +14,7 @@ export default function Labs() {
       </a>
       <TOC />
       <Routes>
-        <Route path="/" element={<Navigate to="Lab3" />} />
+        <Route path="/" element={<Navigate to="Lab2" />} />
         <Route path="Lab1" element={<Lab1 />} />
         <Route path="Lab2" element={<Lab2 />} />
         <Route path="Lab3" element={<Lab3 />} />

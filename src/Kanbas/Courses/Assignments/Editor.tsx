@@ -19,7 +19,7 @@ export default function AssignmentEditor() {
   return (
     <div id="wd-assignments-editor" className="p-4 mx-auto" style={{ maxWidth: "600px" }}>
       <div className="mb-3">
-        <label htmlFor="wd-name">Assignment Name</label>
+        <label htmlFor="wd-name" className="form-label fw-bold">Assignment Name</label>
         <input id="wd-name" value="A1 - ENV + HTML" className="form-control" />
       </div>
 
@@ -53,7 +53,7 @@ export default function AssignmentEditor() {
       {/* Points */}
       <div className="row mb-3">
         <div className="col-sm-3 text-sm-end">
-          <label htmlFor="wd-points">Points</label>
+        <label htmlFor="wd-points" className="form-label fw-bold">Points</label>
         </div>
         <div className="col-sm-9">
           <input id="wd-points" type="number" value={100} className="form-control" />
@@ -63,11 +63,11 @@ export default function AssignmentEditor() {
       {/* Assignment Group */}
       <div className="row mb-3">
         <div className="col-sm-3 text-sm-end">
-          <label htmlFor="wd-group">Assignment Group</label>
+          <label htmlFor="wd-group" className="form-label fw-bold">Assignment Group</label>
         </div>
         <div className="col-sm-9">
           <select id="wd-group" className="form-control">
-            <option value="assignments">ASSIGNMENTS</option>
+            <option value="assignments" className="form-label fw-bold">ASSIGNMENTS</option>
           </select>
         </div>
       </div>
@@ -75,7 +75,7 @@ export default function AssignmentEditor() {
       {/* Display Grade as */}
       <div className="row mb-3">
         <div className="col-sm-3 text-sm-end">
-          <label htmlFor="wd-display-grade-as">Display Grade as</label>
+          <label htmlFor="wd-display-grade-as" className="form-label fw-bold">Display Grade as</label>
         </div>
         <div className="col-sm-9">
           <select id="wd-display-grade-as" className="form-control">
@@ -88,7 +88,7 @@ export default function AssignmentEditor() {
       {/* Submission Type */}
       <div className="row mb-3">
         <div className="col-sm-3 text-sm-end">
-          <label htmlFor="wd-submission-type">Submission Type</label>
+          <label htmlFor="wd-submission-type" className="form-label fw-bold">Submission Type</label>
         </div>
         <div className="border p-3 mb-3">
           <div className="col-sm-9">

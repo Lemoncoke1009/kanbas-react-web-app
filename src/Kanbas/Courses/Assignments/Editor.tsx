@@ -22,11 +22,6 @@ export default function AssignmentEditor() {
       setInputValue("");
     }
   };
-
-  const removeTag = (tag: string) => {
-    setAssignedTo(assignedTo.filter((t) => t !== tag));
-  };
-
   return (
     assignment && (
       <div id="wd-assignments-editor" className="p-4 mx-auto" style={{ maxWidth: "600px" }}>

@@ -1,3 +1,4 @@
+// eslint-disable-next-line 
 import { useLocation } from "react-router";
 export default function TOC() {
   const { pathname } = useLocation();

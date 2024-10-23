@@ -1,9 +1,22 @@
 import { FaPlus } from "react-icons/fa6";
 import { BsSearch } from "react-icons/bs";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function AssignmentsControls() {
+  const navigate = useNavigate();
+  const { cid } = useParams(); 
+
+  const createAssignment = () => {
+    if (!cid) {
+      console.error("No course ID found for assignment creation.");
+      return;
+    }
+
+    navigate(`/Kanbas/Courses/${cid}/Assignments/new`);
+  };
+
   return (
-    <div id="wd-assignments-controls" className="text-nowrap d-flex justify-content-between align-items-center">
+    <div id="wd-assignments-controls" className="d-flex justify-content-between align-items-center">
       <div className="input-group" style={{ width: "300px" }}>
         <span className="input-group-text bg-white border-end-0">
           <BsSearch className="text-secondary" />
@@ -24,7 +37,7 @@ export default function AssignmentsControls() {
           + Group
         </button>
 
-        <button id="wd-add-assignment" className="btn btn-danger btn-lg">
+        <button id="wd-add-assignment" className="btn btn-danger btn-lg" onClick={createAssignment}>
           <FaPlus className="me-2" /> Assignment
         </button>
       </div>

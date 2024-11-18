@@ -40,3 +40,7 @@ export const signout = async () => {
     return data;
   };
   
+
+export function fetchProfile() {
+  throw new Error("Function not implemented.");
+}

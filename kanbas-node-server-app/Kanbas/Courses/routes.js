@@ -7,6 +7,7 @@ export default function CourseRoutes(app) {
       });
     
   app.get("/api/courses", (req, res) => {
+    console.log(req)
     const courses = dao.findAllCourses();
     res.send(courses);
   });
@@ -17,4 +18,12 @@ export default function CourseRoutes(app) {
     res.sendStatus(204);
   });
 
+  app.get("/api/users/current/courses", (req, res) => {
+    const currentUser = req.session["currentUser"];
+    console.log(currentUser)
+    const enrolledCourses = dao.findCoursesForEnrolledUser(currentUser._id);
+    res.send(enrolledCourses);
+  });
+
 }
+

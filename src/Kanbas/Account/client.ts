@@ -41,6 +41,4 @@ export const signout = async () => {
   };
   
 
-export function fetchProfile() {
-  throw new Error("Function not implemented.");
-}
+

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import ProtectedRoute from "./Account/ProtectedRoute";
+import { toggleEnrollment } from "./reducer";
 import { useState } from "react";
 
 interface DashboardProps {
@@ -22,13 +23,22 @@ export default function Dashboard({
 }: DashboardProps) {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const dispatch = useDispatch();
+  const [showAllCourses, setShowAllCourses] = useState(false);
 
-  const allCourses = courses;
+  const toggleShowCourses = () => {
+    setShowAllCourses(!showAllCourses);
+  };
+
+  const handleEnrollmentToggle = (courseId: string, event: React.MouseEvent) => {
+    event.preventDefault(); 
+    dispatch(toggleEnrollment({ userId: currentUser._id, courseId }));
+  };
 
   return (
     <div id="wd-dashboard">
-      <h1 id="wd-dashboard-title">Dashboard</h1> <hr />
-
+      <h1 id="wd-dashboard-title">Dashboard</h1> 
+      <hr />
+      
       <ProtectedRoute roleRequired="FACULTY">
         <h5>
           New Course
@@ -64,13 +74,25 @@ export default function Dashboard({
         />
       </ProtectedRoute>
 
+      {currentUser.role === "STUDENT" && (
+        <div>
+          <button
+            className="btn btn-primary float-end"
+            onClick={toggleShowCourses}
+          >
+            {showAllCourses ? "Show Enrollments" : "Show All Courses"}
+          </button>
+        </div>
+      )}
+
       <h2 id="wd-dashboard-published">
-        Published Courses ({allCourses.length})
-      </h2> <hr />
+        Published Courses ({courses.length})
+      </h2> 
+      <hr />
 
       <div id="wd-dashboard-courses" className="row">
         <div className="row row-cols-1 row-cols-md-5 g-4">
-          {allCourses.map((course) => (
+          {courses.map((course) => (
             <div
               key={course._id}
               className="wd-dashboard-course col"
@@ -122,7 +144,15 @@ export default function Dashboard({
                         Edit
                       </button>
                     </ProtectedRoute>
-                    
+
+                    {currentUser.role === "STUDENT" && (
+                      <button
+                        onClick={(event) => handleEnrollmentToggle(course._id, event)}
+                        className="btn btn-success float-end"
+                      >
+                        Enroll
+                      </button>
+                    )}
                   </div>
                 </Link>
               </div>

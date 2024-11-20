@@ -18,12 +18,5 @@ export default function CourseRoutes(app) {
     res.sendStatus(204);
   });
 
-  app.get("/api/users/current/courses", (req, res) => {
-    const currentUser = req.session["currentUser"];
-    console.log(currentUser)
-    const enrolledCourses = dao.findCoursesForEnrolledUser(currentUser._id);
-    res.send(enrolledCourses);
-  });
-
 }
 

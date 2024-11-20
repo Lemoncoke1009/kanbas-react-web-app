@@ -8,20 +8,19 @@ import store from "./Kanbas/store";
 export default function App() {
   return (
     <HashRouter>
+      <Provider store={store}>
       <div>
         <Routes>
           <Route path="/" element={<Navigate to="Labs" />} />
           <Route path="/Labs/*" element={<Labs />} />
           <Route
-            path="/Kanbas/*"
-            element={
-              <Provider store={store}>
-                <Kanbas />
-              </Provider>
+            path="/Kanbas/*" element={<Kanbas />
+              
             }
           />
         </Routes>
       </div>
+      </Provider>
     </HashRouter>
   );
 }

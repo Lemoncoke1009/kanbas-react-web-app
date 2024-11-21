@@ -14,6 +14,7 @@ export default function Profile() {
     dispatch(setCurrentUser(updatedProfile));
   };
 
+
   const fetchProfile = useCallback(() => {
     if (!currentUser) return navigate("/Kanbas/Account/Signin");
     setProfile(currentUser);

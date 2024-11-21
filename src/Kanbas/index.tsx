@@ -7,8 +7,7 @@ import KanbasNavigation from "./Navigation";
 import "./styles.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { useEffect, useState } from "react";
-import store from "./store";
-import { Provider, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import ProtectedRoute from "./Account/ProtectedRoute";
 import * as userClient from "./Account/client";
 import * as courseClient from "./Courses/client";
@@ -17,20 +16,31 @@ import Session from './Account/Session';
 export default function Kanbas() {
   const [courses, setCourses] = useState<any[]>([]);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const deleteCourse = async (courseId: string) => {
+    const status = await courseClient.deleteCourse(courseId);
+    setCourses(courses.filter((course) => course._id !== courseId));
+  };
 
   const fetchCourses = async () => {
-    let courses = [];
     try {
-      courses = await userClient.findMyCourses();
+      const courses = await userClient.findMyCourses();
+      setCourses(courses);
     } catch (error) {
       console.error(error);
     }
-    setCourses(courses);
   };
-
   useEffect(() => {
     fetchCourses();
   }, [currentUser]);
+
+  const updateCourse = async () => {
+    await courseClient.updateCourse(course);
+    setCourses(courses.map((c) => {
+        if (c._id === course._id) { return course; }
+        else { return c; }
+    })
+  );};
+
 
   const [course, setCourse] = useState<any>({
     _id: "1234",
@@ -46,17 +56,7 @@ export default function Kanbas() {
     setCourses([...courses, newCourse]);
   };
 
-  const deleteCourse = async (courseId: string) => {
-    await courseClient.deleteCourse(courseId);
-    setCourses(courses.filter((course) => course._id !== courseId));
-  };
 
-  const updateCourse = async () => {
-    await courseClient.updateCourse(course);
-    setCourses(
-      courses.map((c) => (c._id === course._id ? course : c))
-    );
-  };
 
   return (
     <Session>

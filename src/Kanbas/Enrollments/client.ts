@@ -1,23 +1,29 @@
 import axios from "axios";
+const REMOTE_SERVER = process.env.REACT_APP_REMOTE_SERVER;
+const COURSES_API = `${REMOTE_SERVER}/api/courses`;
+const axiosWithCredentials = axios.create({ withCredentials: true });
 
-const api = axios.create({ 
-  withCredentials: true,
-  baseURL: process.env.REACT_APP_REMOTE_SERVER 
-});
-
-export const enrollInCourse = async (userId: string, courseId: string) => {
-  const response = await api.post(`/api/courses/${userId}/${courseId}/enroll`);
+export const enrollCourse = async (userId: String, courseId: string) => {
+  const response = await axios.post(
+    `${COURSES_API}/${userId}/${courseId}/enroll`
+  );
+  return response.data;
+};
+export const unenrollCourse = async (userId: String, courseId: string) => {
+  const response = await axios.delete(
+    `${COURSES_API}/${userId}/${courseId}/unenroll`
+  );
   return response.data;
 };
 
-export const unenrollFromCourse = async (userId: string, courseId: string) => {
-  const response = await api.delete(`/api/courses/${userId}/${courseId}/unenroll`);
-  return response.data;
+export const fetchEnrolledCourses = async (userId: string) => {
+  try {
+    const response = await axiosWithCredentials.get(
+      `${REMOTE_SERVER}/api/users/${userId}/courses`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching enrolled courses:", error);
+    throw error;
+  }
 };
-
-export const checkEnrollmentStatus = async (userId: string, courseId: string) => {
-  const response = await api.get(`/api/courses/${userId}/${courseId}/enrollment`);
-  return response.data;
-};
-
-export {};

@@ -140,7 +140,7 @@ export default function Dashboard({
                     to={`/Kanbas/Courses/${course._id}`}
                   >
                     <img
-                      src={`/images/${course._id}.png`}
+                      src={`/images/${course._id}.jpg`}
                       width={280}
                       height={160}
                       alt=""

@@ -34,16 +34,19 @@ export default function Kanbas() {
   }, [currentUser]);
   
   const updateCourse = async () => {
-    console.log("Current course state before update:", course); // Add this log
+    console.log("Current course state before update:", course);
+    console.log("Course ID before update:", course?._id); // Add this line
+    
     try {
         if (!course?._id) {
             console.error('Invalid course or missing course ID');
             return;
         }
 
-        console.log("Attempting to update course:", course); // Add this log
-        const updatedCourse = await courseClient.updateCourse(course);
-        console.log("Update response:", updatedCourse); // Add this log
+        const updatedCourse = await courseClient.updateCourse({
+            ...course,
+            _id: course._id // Explicitly include the ID
+        });
         
         setCourses(courses.map((c) => 
             c._id === course._id ? updatedCourse : c

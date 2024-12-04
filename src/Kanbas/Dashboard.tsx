@@ -132,7 +132,11 @@ export default function Dashboard({
               key={course._id}
               className="wd-dashboard-course col"
               style={{ width: "300px" }}
+              
             >
+              
+              <small>Course ID: {course._id}</small>
+
               <div className="card rounded-3 overflow-hidden">
                 <ProtectedRoute>
                   <Link
@@ -207,7 +211,11 @@ export default function Dashboard({
                             onClick={(event) => {
                               event.preventDefault();
                               console.log("Editing course:", course);
-                              setCourse(course);
+                              console.log("Course ID:", course._id);
+                              setCourse({
+                                ...course,
+                                _id: course._id  
+                            });
                             }}
                             className="btn btn-warning me-2 float-end"
                           >

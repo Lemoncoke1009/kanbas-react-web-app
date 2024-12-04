@@ -23,6 +23,7 @@ export const createCourse = async (course: any) => {
 
 export const fetchAllCourses = async () => {
   const { data } = await axiosWithCredentials.get(COURSES_API);
+  console.log("Fetched courses:", data);
   return data;
 };
 export const deleteCourse = async (id: string) => {

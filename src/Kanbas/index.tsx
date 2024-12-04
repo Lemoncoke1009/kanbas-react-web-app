@@ -34,19 +34,18 @@ export default function Kanbas() {
   }, [currentUser]);
   const updateCourse = async () => {
     try {
-        if (!course?._id) {
-            console.error('Invalid course or missing course ID');
+        if (!course._id || course._id === "1234") { 
+            console.error('Cannot update: This is a new course');
             return;
         }
 
         const updatedCourse = await courseClient.updateCourse(course);
-        
         setCourses(courses.map((c) => 
             c._id === course._id ? updatedCourse : c
         ));
-
     } catch (error) {
-        console.error('Failed to update course:', error);    }
+        console.error('Failed to update course:', error);
+    }
 };
 
 

@@ -32,14 +32,22 @@ export default function Kanbas() {
   useEffect(() => {
     fetchCourses();
   }, [currentUser]);
-
   const updateCourse = async () => {
-    await courseClient.updateCourse(course);
-    setCourses(courses.map((c) => {
-        if (c._id === course._id) { return course; }
-        else { return c; }
-    })
-  );};
+    try {
+        if (!course?._id) {
+            console.error('Invalid course or missing course ID');
+            return;
+        }
+
+        const updatedCourse = await courseClient.updateCourse(course);
+        
+        setCourses(courses.map((c) => 
+            c._id === course._id ? updatedCourse : c
+        ));
+
+    } catch (error) {
+        console.error('Failed to update course:', error);    }
+};
 
 
   const [course, setCourse] = useState<any>({

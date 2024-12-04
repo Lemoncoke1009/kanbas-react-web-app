@@ -3,6 +3,10 @@ const axiosWithCredentials = axios.create({ withCredentials: true });
 const REMOTE_SERVER = process.env.REACT_APP_REMOTE_SERVER;
 const COURSES_API = `${REMOTE_SERVER}/api/courses`;
 
+interface Course {
+  _id: string;
+}
+
 export const createModuleForCourse = async (courseId: string, module: any) => {
   const response = await axios.post(
     `${COURSES_API}/${courseId}/modules`,
@@ -26,9 +30,21 @@ export const deleteCourse = async (id: string) => {
   return data;
 };
 
-export const updateCourse = async (course: any) => {
-  const { data } = await axiosWithCredentials.put(`${COURSES_API}/${course._id}`, course);
-  return data;
+export const updateCourse = async (course: Course) => {
+  if (!course._id) {
+    throw new Error('Course ID is required');
+  }
+
+  try {
+    const { data } = await axiosWithCredentials.put(
+      `${COURSES_API}/${course._id}`,
+      course
+    );
+    return data;
+  } catch (error) {
+    console.error('Error updating course:', error);
+    throw error;
+  }
 };
 
 export const findModulesForCourse = async (courseId: string) => {

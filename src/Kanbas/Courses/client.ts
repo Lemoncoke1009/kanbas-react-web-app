@@ -51,9 +51,13 @@ export const updateCourse = async (course: any) => {
 };
 
 export const findModulesForCourse = async (courseId: string) => {
-  const response = await axiosWithCredentials
-    .get(`${COURSES_API}/${courseId}/modules`);
-  return response.data;
+  try {
+    const response = await axios.get(`${COURSES_API}/${courseId}/modules`);
+    return Array.isArray(response.data) ? response.data : [];
+  } catch (error) {
+    console.error("Error fetching modules:", error);
+    return []; 
+  }
 };
 
 

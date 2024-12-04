@@ -36,9 +36,19 @@ export default function Modules() {
   }, []);
   const createModuleForCourse = async () => {
     if (!cid) return;
-    const newModule = { name: moduleName, course: cid };
-    const module = await coursesClient.createModuleForCourse(cid, newModule);
-    dispatch(addModule(module));
+    
+    try {
+      const newModule = { name: moduleName, course: cid };
+      const createdModule = await coursesClient.createModuleForCourse(cid, newModule);
+      console.log("Created module:", createdModule); 
+      
+      if (createdModule && createdModule._id) {
+        dispatch(addModule(createdModule));
+        setModuleName(""); 
+      }
+    } catch (error) {
+      console.error("Error creating module:", error);
+    }
   };
 
 

@@ -47,3 +47,9 @@ export const createAssignmentForCourse = async (
   return response.data;
 };
 
+export const createCourse = async (course: any) => {
+  const { data } = await axios.post(`${COURSES_API}/current/courses`, course);
+  return data;
+};
+
+

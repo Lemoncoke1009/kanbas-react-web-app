@@ -206,6 +206,7 @@ export default function Dashboard({
                             id="wd-edit-course-click"
                             onClick={(event) => {
                               event.preventDefault();
+                              console.log("Editing course:", course);
                               setCourse(course);
                             }}
                             className="btn btn-warning me-2 float-end"

@@ -30,20 +30,22 @@ export const deleteCourse = async (id: string) => {
   return data;
 };
 
-export const updateCourse = async (course: Course) => {
+export const updateCourse = async (course: any) => {
+  console.log("Client attempting to update course:", course); // Add this log
   if (!course._id) {
-    throw new Error('Course ID is required');
+      throw new Error('Course ID is required');
   }
 
   try {
-    const { data } = await axiosWithCredentials.put(
-      `${COURSES_API}/${course._id}`,
-      course
-    );
-    return data;
+      const { data } = await axiosWithCredentials.put(
+          `${COURSES_API}/${course._id}`,
+          course
+      );
+      console.log("Update response from server:", data); // Add this log
+      return data;
   } catch (error) {
-    console.error('Error updating course:', error);
-    throw error;
+      console.error('Error updating course:', error);
+      throw error;
   }
 };
 

@@ -1,57 +1,33 @@
 import { createSlice } from "@reduxjs/toolkit";
-//import { assignments } from "../../Database";
+import * as db from "../../Database";
 
-const initialState = {
-    assignments: [],
-    assignment: {
-        title: "",
-        course: "",
-        description: "",
-        unlock: "",
-        due: "",
-        points: 0
-    }
-};
+const initialState = [...db.assignments];  // Ensure a copy of the original assignments
 
 const assignmentsSlice = createSlice({
-    name: "assignments",
-    initialState,
-    reducers: {
-        setAssignments: (state, action) => {
-            state.assignments = action.payload;
-        },
-        addAssignment: (state, action) => {
-            const newAssignment: any = [
-                ...state.assignments,
-                {
-                    ...action.payload,
-                    _id: new Date().getTime().toString(),
-                }]
-            state.assignments = newAssignment;
-            state.assignment = {
-                title: "",
-                course: "",
-                description: "",
-                unlock: "",
-                due: "",
-                points: 0
-            }
-        },
-        deleteAssignment: (state, action) => {
-            state.assignments = state.assignments.filter(
-                (a: any) => a._id !== action.payload
-            );
-        },
-        updateAssignment: (state, {payload: assignment}) => {
-            state.assignments = state.assignments.map((a: any) =>
-                a._id === assignment._id ? assignment : a
-            ) as any;
-        },
-        setAssignment: (state, action) => {
-            state.assignment = action.payload;
-        }
+  name: "assignments",
+  initialState: [...db.assignments],
+  reducers: {
+    addAssignment: (state, action) => {
+      console.log('Current state:', state);
+      console.log('New assignment:', action.payload);
+      return [...state, action.payload];  
     },
+    deleteAssignment: (state, action) => {
+      console.log('Deleting assignment:', action.payload);
+      return state.filter((assignment) => assignment._id !== action.payload);
+    },
+    updateAssignment: (state, action) => {
+      const index = state.findIndex(
+        (assignment) => assignment._id === action.payload._id
+      );
+      if (index !== -1) {
+        console.log('Updating assignment at index:', index);
+        state[index] = action.payload;
+      }
+    },
+  },
 });
 
-export const { addAssignment, deleteAssignment, setAssignment, setAssignments, updateAssignment } = assignmentsSlice.actions;
+export const { addAssignment, deleteAssignment, updateAssignment } =
+  assignmentsSlice.actions;
 export default assignmentsSlice.reducer;

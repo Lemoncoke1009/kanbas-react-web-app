@@ -1,10 +1,10 @@
 import { MdDoNotDisturbAlt } from "react-icons/md";
-import { FaBookOpen, FaCheckCircle, FaHome } from "react-icons/fa";
+import { FaCheckCircle } from "react-icons/fa";
 import { BiImport } from "react-icons/bi";
 import { LiaFileImportSolid } from "react-icons/lia";
-import { GrAnnounce } from "react-icons/gr";
-import { SiGoogleanalytics } from "react-icons/si";
-import { IoIosNotifications } from "react-icons/io";
+import { AiOutlineHome } from "react-icons/ai";  // Home Page Icon
+import { FaStream, FaBullhorn, FaChartLine, FaBell } from "react-icons/fa"; // Stream, Announcement, Analytics, Notifications
+
 export default function CourseStatus() {
   return (
     <div id="wd-course-status" style={{ width: "300px" }}>
@@ -12,27 +12,42 @@ export default function CourseStatus() {
       <div className="d-flex">
         <div className="w-50 pe-1">
           <button className="btn btn-lg btn-secondary w-100 text-nowrap ">
-            <MdDoNotDisturbAlt className="me-2 fs-5" /> Unpublish </button>
+            <MdDoNotDisturbAlt className="me-2 fs-5" /> Unpublish 
+          </button>
         </div>
         <div className="w-50">
           <button className="btn btn-lg btn-success w-100">
-            <FaCheckCircle className="me-2 fs-5" /> Publish </button>
+            <FaCheckCircle className="me-2 fs-5" /> Publish 
+          </button>
         </div>
-      </div><br />
+      </div>
+      <br />
       <button className="btn btn-lg btn-secondary w-100 mt-1 text-start">
-        <BiImport className="me-2 fs-5" /> Import Existing Content </button>
+        <BiImport className="me-2 fs-5" /> Import Existing Content 
+      </button>
       <button className="btn btn-lg btn-secondary w-100 mt-1 text-start">
-        <LiaFileImportSolid className="me-2 fs-5" /> Import from Commons </button>
+        <LiaFileImportSolid className="me-2 fs-5" /> Import from Commons 
+      </button>
+
       <button className="btn btn-lg btn-secondary w-100 mt-1 text-start">
-        <FaHome className="me-2 fs-5" /> Choose Home Page </button>
+        <AiOutlineHome className="me-2 fs-5" /> Choose Home Page 
+      </button>
+
       <button className="btn btn-lg btn-secondary w-100 mt-1 text-start">
-        <FaBookOpen className="me-2 fs-5" /> View Course Stream </button>
+        <FaStream className="me-2 fs-5" /> View Course Stream 
+      </button>
+
       <button className="btn btn-lg btn-secondary w-100 mt-1 text-start">
-        <GrAnnounce className="me-2 fs-5" /> New Announcement </button>
+        <FaBullhorn className="me-2 fs-5" /> New Announcement 
+      </button>
+
       <button className="btn btn-lg btn-secondary w-100 mt-1 text-start">
-        <SiGoogleanalytics className="me-2 fs-5" /> New Analytics </button>
+        <FaChartLine className="me-2 fs-5" /> New Analytics 
+      </button>
+
       <button className="btn btn-lg btn-secondary w-100 mt-1 text-start">
-        <IoIosNotifications className="me-2 fs-5" /> View Course Notifications </button>
+        <FaBell className="me-2 fs-5" /> View Course Notifications 
+      </button>
     </div>
   );
 }

@@ -5,7 +5,7 @@ interface Module {
   _id: string;
   name: string;
   course: string;
-  lessons?: any[];  // Add proper Lesson interface if needed
+  lessons?: any[];  
   editing?: boolean;
 }
 

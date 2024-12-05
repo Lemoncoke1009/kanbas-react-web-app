@@ -20,6 +20,8 @@ export default function Kanbas() {
   const [enrolling, setEnrolling] = useState<boolean>(false);
   const findCoursesForUser = async () => {
     try {
+      if (!currentUser?._id) return;
+      // This gets only enrolled courses for the current user
       const courses = await userClient.findCoursesForUser(currentUser._id);
       setCourses(courses);
     } catch (error) {
@@ -72,10 +74,12 @@ export default function Kanbas() {
 
 
   useEffect(() => {
-    if (enrolling) {
-      fetchCourses();
-    } else {
-      findCoursesForUser();
+    if (currentUser) {
+      if (enrolling) {
+        fetchCourses(); 
+      } else {
+        findCoursesForUser();
+      }
     }
   }, [currentUser, enrolling]);
  

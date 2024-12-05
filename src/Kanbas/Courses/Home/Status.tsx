@@ -1,14 +1,12 @@
 import { MdDoNotDisturbAlt } from "react-icons/md";
-import { FaCheckCircle } from "react-icons/fa";
+import { FaCheckCircle, FaHome } from "react-icons/fa";
 import { BiImport } from "react-icons/bi";
 import { LiaFileImportSolid } from "react-icons/lia";
-import { SlTarget } from "react-icons/sl";
-import { IoBarChartSharp } from "react-icons/io5";
-import { IoBarChartOutline } from "react-icons/io5";
+import { RiBarChart2Fill } from "react-icons/ri";
 import { TfiAnnouncement } from "react-icons/tfi";
-import { CiBellOn } from "react-icons/ci";
+import { IoIosNotifications } from "react-icons/io";
 
-
+{/* Find more icons */}
 export default function CourseStatus() {
   return (
     <div id="wd-course-status" style={{ width: "300px" }}>
@@ -27,16 +25,16 @@ export default function CourseStatus() {
         <BiImport className="me-2 fs-5" /> Import Existing Content </button>
       <button className="btn btn-lg btn-secondary w-100 mt-1 text-start">
         <LiaFileImportSolid className="me-2 fs-5" /> Import from Commons </button>
+
       <button className="btn btn-lg btn-secondary w-100 mt-1 text-start">
-        <SlTarget className="me-2 fs-5" /> Choose Home Page </button>
+        <FaHome className="me-2 fs-5" /> Choose Home Page </button>
       <button className="btn btn-lg btn-secondary w-100 mt-1 text-start">
-        <IoBarChartSharp className="me-2 fs-5" /> View Course Stream </button>
+        <RiBarChart2Fill className="me-2 fs-5" /> View Course Screen </button>
       <button className="btn btn-lg btn-secondary w-100 mt-1 text-start">
         <TfiAnnouncement className="me-2 fs-5" /> New Announcement </button>
       <button className="btn btn-lg btn-secondary w-100 mt-1 text-start">
-        <IoBarChartOutline className="me-2 fs-5" /> New Analytics </button>
+        <RiBarChart2Fill className="me-2 fs-5" /> New Analytics </button>
       <button className="btn btn-lg btn-secondary w-100 mt-1 text-start">
-        <CiBellOn className="me-2 fs-5" /> View Course Notifications </button>
+        <IoIosNotifications className="me-2 fs-5" /> View Course Notifications </button>
     </div>
-  );
-}
+);}

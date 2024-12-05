@@ -1,15 +1,13 @@
+import ModuleEditor from "./ModuleEditor";
 import { FaPlus } from "react-icons/fa6";
 import GreenCheckmark from "./GreenCheckmark";
-import { PiEmpty } from "react-icons/pi";
-import ModuleEditor from "./ModuleEditor";
-
 export default function ModulesControls(
   { moduleName, setModuleName, addModule }:
-    { moduleName: string; setModuleName: (title: string) => void; addModule: () => void; }) {
+  { moduleName: string; setModuleName: (title: string) => void; addModule: () => void; }) {
   return (
-    <div id="wd-modules-controls" className="text-nowrap">
+    <div id="wd-modules-controls" className="text-nowrap mx-3">
       <button id="wd-add-module-btn" className="btn btn-lg btn-danger me-1 float-end"
-        data-bs-toggle="modal" data-bs-target="#wd-add-module-dialog" >
+        data-bs-toggle="modal" data-bs-target="#wd-add-module-dialog">
         <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
         Module</button>
       <div className="dropdown d-inline me-1 float-end">
@@ -30,20 +28,24 @@ export default function ModulesControls(
           </li>
           <li>
             <a id="wd-unpublish-all-modules-and-items" className="dropdown-item" href="#">
-              <PiEmpty />
+              <GreenCheckmark />
               Unpublish all modules and items</a>
           </li>
           <li>
             <a id="wd-unpublish-modules-only" className="dropdown-item" href="#">
-              <PiEmpty />
+              <GreenCheckmark />
               Unpublish modules only</a>
           </li>
         </ul>
       </div>
-      <button id="wd-view-progress" className="btn btn-lg btn-secondary me-1 float-end">View Progress</button>
-      <button id="wd-collapse-all" className="btn btn-lg btn-secondary me-1 float-end">Collapse All</button>
+      <button id="wd-view-progress" className="btn btn-lg me-1 btn-secondary float-end">
+        View Progress
+      </button>
+      <button id="wd-collapse-all" className="btn btn-lg me-1 btn-secondary float-end">
+        Collapse All
+      </button>
+
       <ModuleEditor dialogTitle="Add Module" moduleName={moduleName}
-        setModuleName={setModuleName} addModule={addModule} />
+                    setModuleName={setModuleName} addModule={addModule} />
     </div>
-  );
-}
+);}

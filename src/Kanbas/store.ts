@@ -12,5 +12,4 @@ const store = configureStore({
     enrollmentsReducer,
   },
 });
-
 export default store;

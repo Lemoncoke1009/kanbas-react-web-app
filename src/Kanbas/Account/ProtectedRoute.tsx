@@ -6,5 +6,4 @@ export default function ProtectedRoute({ children }: { children: any }) {
     return children;
   } else {
     return <Navigate to="/Kanbas/Account/Signin" />;
-  }
-}
+}}

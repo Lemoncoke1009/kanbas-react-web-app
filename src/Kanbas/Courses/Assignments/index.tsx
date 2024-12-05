@@ -1,117 +1,126 @@
-import { useEffect, useState } from "react";
+import AssignmentControls from "./AssignmentControls";
+import { BsGripVertical } from "react-icons/bs";
+import LessonControlButton from "./LessonControlButton";
+import { MdOutlineAssignment } from "react-icons/md";
+import { IoMdArrowDropdown } from "react-icons/io";
+import { FaPlus } from "react-icons/fa";
+import { useParams } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteAssignment, setAssignments } from "./reducer";
-import { IoIosSearch } from "react-icons/io";
-import { FaTrash } from "react-icons/fa";
-import { VscNotebook } from "react-icons/vsc";
-import DeleteDialog from "./DeleteDialog";
-import { useParams } from "react-router-dom";
-import LessonControlButtons from "../Modules/LessonControlButtons";
-import { BsGripVertical } from "react-icons/bs";
-import BSGripVertical from "../Modules/BsGripVertical";
-import AssignmentHeaderButtons from "./AssignmentHeaderButtons";
-import AssignmentsControl from "./AssignmentsControl";
+import AssignmentControlButtons from "./AssignmentControlButton";
+import { useEffect, useState } from "react";
 import * as coursesClient from "../client";
-import * as assignmentsClient from "./client";
+import * as assignmentClient from "./client"
+
 
 export default function Assignments() {
-  const dispatch = useDispatch();
-  const { cid } = useParams();
-  const { assignments } = useSelector((state: any) => state.assignmentsReducer);
-  const { currentUser } = useSelector((state: any) => state.accountReducer);
-  const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(null);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const { cid, aid } = useParams();
+    const { assignments } = useSelector((state: any) => state.assignmentsReducer);
+    const { currentUser } = useSelector((state: any) => state.accountReducer);
+    const dispatch = useDispatch();
+    const handleDeleteAssignment = (assignmentId: string) => {
+      dispatch(deleteAssignment(assignmentId));
+    };
 
-  const handleDeleteClick = (assignmentId: string) => {
-    setSelectedAssignmentId(assignmentId);
-    setShowDeleteDialog(true);
-  };
+    const [showModal, setShowModal] = useState(false);
+    const [assignmentToDelete, setAssignmentToDelete] = useState<string | null>(null);
 
-  const fetchAssignments = async () => {
-    const assignments = await coursesClient.findAssignmentsForCourse(cid as string);
-    dispatch(setAssignments(assignments));
-  };
-  useEffect(() => {
-    fetchAssignments();
-  }, []);
+    const fetchAssignments = async () => {
+      const assignments = await coursesClient.findAssignmentsForCourse(cid as string);
+      dispatch(setAssignments(assignments));
+    };
+    useEffect(() => {
+      fetchAssignments();
+    }, []);
 
-  const removeAssignment = async (assignmentId: string) => {
-    await assignmentsClient.deleteAssignment(assignmentId);
-    dispatch(deleteAssignment(assignmentId));
-    setSelectedAssignmentId(null);
-    setShowDeleteDialog(false);
-  };
+    const confirmDeleteAssignment = (assignmentId: string) => {
+      setAssignmentToDelete(assignmentId);
+      setShowModal(true);
+    };
 
-  return (
-    <div>
-      <div className="row mb-3 align-items-center">
-        <div className="col-auto">
-          <div className="d-flex align-items-center">
-            <IoIosSearch className="me-2" />
-            <input id="wd-search-assignment" className="form-control" placeholder="Search for Assignment" />
-          </div>
-        </div>
-        {currentUser.role === "FACULTY" && <AssignmentsControl />}
-      </div>
-      <ul id="wd-assignments" className="list-group rounded-0">
-        <li className="wd-assignment-group list-group-item p-0 mb-5 fs-5 border-gray">
-          <div className="wd-title p-3 ps-2 bg-secondary align-items-center">
-            {currentUser.role === "FACULTY" && <BSGripVertical />}
-            ASSIGNMENTS
-            {currentUser.role === "FACULTY" && <AssignmentHeaderButtons />}
-          </div>
-          <ul className="wd-lessons list-group rounded-0">
-            {assignments
-              .map((assignment: any) => {
-                const dueDate = new Date(assignment.dueDate);
-                const availableDate = new Date(assignment.availableFrom);
-                const formattedAvailableFromDate = availableDate.toLocaleString("en-US", {
-                  month: "long",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "numeric",
-                  hour12: true,
-                });
-                const formattedDueDate = dueDate.toLocaleString("en-US", {
-                  month: "long",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "numeric",
-                  hour12: true,
-                });
-                return (
-                  <li key={assignment._id} className="wd-lesson list-group-item p-3 ps-1 d-flex align-items-center">
-                    {currentUser.role === "FACULTY" && <BsGripVertical />}
-                    <VscNotebook color="green" className="me-3" />
-                    <div className="me-5">
-                      <a className="wd-assignment-link text-dark text-decoration-none" href={`#/Kanbas/Courses/${cid}/Assignments/${assignment._id}`}>
+    const handleDeleteConfirmed = async () => {
+      if (assignmentToDelete) {
+        await assignmentClient.deleteAssignment(assignmentToDelete);
+        dispatch(deleteAssignment(assignmentToDelete));
+      }
+      setShowModal(false);
+      setAssignmentToDelete(null);
+    };
+
+    const handleDeleteCancelled = () => {
+      setShowModal(false);
+      setAssignmentToDelete(null);
+    };
+
+    const handleCloseModal = () => {
+      setShowModal(false);
+      setAssignmentToDelete(null);
+    };
+
+    return (
+      <div id="wd-assignments">
+
+        <AssignmentControls />
+
+        <ul id="wd-modules" className="list-group rounded-0 mx-5">
+          <li className="wd-module list-group-item p-0 mb-5 fs-5 border-gray">
+            <div className="wd-title p-3 ps-2 bg-secondary"> 
+              <BsGripVertical className="me-2 fs-3 " />
+              <IoMdArrowDropdown className=""/>
+              <span className="fs-4 ">ASSIGNMENTS</span>
+              <AssignmentControlButtons />
+              <FaPlus className="me-2 float-end" />
+              <span className="border border-dark rounded float-end mx-3 px-2">40% of Total</span>
+            </div>
+            <ul className="wd-lessons list-group rounded-0">
+              {assignments
+                .map((assignment: any) => 
+                  <li className="wd-lesson list-group-item p-3 ps-1">
+                    <BsGripVertical className="me-2 fs-3 float-start mt-4" />
+                    <MdOutlineAssignment className="text-success me-4 fs-3  float-start mt-4" />
+                    <div className="float-start">
+                      <a className="wd-assignment-link text-decoration-none text-dark fs-4 "
+                        href={`#/Kanbas/Courses/${cid}/Assignments/${currentUser.role === "FACULTY" ? assignment._id : ""}`}>
                         {assignment.title}
-                      </a>
-                      <div className="text-muted small">
-                        <strong>Not available until</strong> {formattedAvailableFromDate} | <strong> Due</strong> {formattedDueDate} | {assignment.points} pts
-                      </div>
+                      </a> <br/>
+                      <span className="fs-6 ">
+                        <span className="text-danger">Multiple Modules</span> | <b>Not Available Until</b> {assignment.available} |<br/>
+                        <b>Due</b> {assignment.due} | {assignment.points} Points
+                      </span>
+                  
                     </div>
-                    {currentUser.role === "FACULTY" && (
-                      <div className="ms-auto">
-                        <FaTrash
-                          className="text-danger me-2 mb-1"
-                          onClick={() => handleDeleteClick(assignment._id)}
-                        />
-                        <LessonControlButtons />
-                      </div>
-                    )}
+                    <LessonControlButton assignId={assignment._id} deleteAssignment={confirmDeleteAssignment}/>
                   </li>
-                );
-              })}
-          </ul>
-        </li>
-      </ul>
-      <DeleteDialog
-        assignmentId={selectedAssignmentId}
-        onConfirm={removeAssignment}
-        show={showDeleteDialog}
-        onHide={() => setShowDeleteDialog(false)}
-      />
-    </div>
-  );
-}
+                  )} 
+            </ul>
+          </li>
+        </ul>
+        {showModal && (
+           <div className="modal fade show d-block" tabIndex={-1} role="dialog" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+           <div className="modal-dialog">
+               <div className="modal-content">
+                   <div className="modal-header">
+                       <h5 className="modal-title">Confirm Deletion</h5>
+                       <button type="button" className="btn-close" onClick={handleCloseModal}></button>
+                   </div>
+                   <div className="modal-body">
+                       <p>Are you sure you want to delete this assignment?</p>
+                   </div>
+                   <div className="modal-footer">
+                       <button type="button" className="btn btn-secondary" onClick={handleDeleteCancelled}>
+                           Cancel
+                       </button>
+                       <button type="button" className="btn btn-danger" onClick={handleDeleteConfirmed}>
+                           Delete
+                       </button>
+                   </div>
+               </div>
+           </div>
+       </div>
+        
+      )}
+      </div>
+                
+               
+  );}
+  

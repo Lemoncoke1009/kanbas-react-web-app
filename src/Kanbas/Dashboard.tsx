@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector,useDispatch } from "react-redux";
 import ProtectedRoute from "./Account/ProtectedRoute";
 import { useState, useEffect } from "react";
 import * as enrollmentClient from "./Enrollments/client";
@@ -24,51 +24,19 @@ export default function Dashboard({
   addNewCourse: () => void;
   deleteCourse: (course: any) => void;
   updateCourse: () => void;
-  enrolling: boolean;
+  enrolling: boolean; 
   setEnrolling: (enrolling: boolean) => void;
   updateEnrollment: (courseId: string, enrolled: boolean) => void;
 }) {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const isFaculty = currentUser?.role === "FACULTY";
   const isStudent = currentUser?.role === "STUDENT";
+  const [showAllCourses, setShowAllCourses] = useState(false);
   const dispatch = useDispatch();
   const [localCourses, setLocalCourses] = useState<any[]>([]);
   const [enrolledCourses, setEnrolledCourses] = useState<any[]>([]);
-
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        if (!currentUser?._id) return;
-  
-        if (enrolling) {
-          const allCourses = await courseClient.fetchAllCourses();
-          const myEnrolledCourses = await accountClient.findMyCourses();
-          const coursesWithEnrollment = allCourses.map((course: { _id: any; }) => ({
-            ...course,
-            enrolled: myEnrolledCourses.some((c: { _id: any; }) => c._id === course._id)
-          }));
-          setLocalCourses(coursesWithEnrollment);
-          setEnrolledCourses(myEnrolledCourses);
-        } else {
-          const myEnrolledCourses = await accountClient.findMyCourses();
-          setLocalCourses(myEnrolledCourses);
-          setEnrolledCourses(myEnrolledCourses);
-        }
-      } catch (error) {
-        console.error("Error fetching courses:", error);
-      }
-    };
-  
-    fetchCourses();
-  }, [currentUser, enrolling]);
-
   const handleEnroll = async (courseId: string) => {
     try {
-      if (!currentUser?._id) {
-        console.error("No user ID found");
-        return;
-      }
-      console.log("Enrolling user:", currentUser._id, "in course:", courseId);
       await enrollmentClient.enrollCourse(currentUser._id, courseId);
       const updatedCourses = await accountClient.findMyCourses();
       setEnrolledCourses(updatedCourses);
@@ -82,6 +50,7 @@ export default function Dashboard({
     try {
       await enrollmentClient.unenrollCourse(currentUser._id, courseId);
       const updatedCourses = await accountClient.findMyCourses();
+      setLocalCourses(updatedCourses);
       setEnrolledCourses(updatedCourses);
       dispatch(unenrollCourse({ userId: currentUser._id, courseId }));
     } catch (error) {
@@ -89,35 +58,33 @@ export default function Dashboard({
     }
   };
 
-  const handleUpdateEnrollment = async (courseId: string, enrolled: boolean) => {
-    try {
-      if (!currentUser?._id) return;
-      
-      if (enrolled) {
-        await handleEnroll(courseId);
-      } else {
-        await handleUnenroll(courseId);
-      }
-    } catch (error) {
-      console.error("Error updating enrollment:", error);
+  const toggleCourseList = async () => {
+    setShowAllCourses((prev) => !prev);
+    if (!showAllCourses) {
+      const allCourses = await courseClient.fetchAllCourses();
+      setLocalCourses(allCourses);
+    } else {
+      setLocalCourses(enrolledCourses);
     }
   };
 
+  useEffect(() => {
+    const fetchEnrolledCourses = async () => {
+      const courses = await courseClient.fetchAllCourses();
+      setEnrolledCourses(courses);
+      setLocalCourses(courses);
+    };
+
+    fetchEnrolledCourses();
+  }, [currentUser]);
+
   return (
     <div id="wd-dashboard">
-      <h1 id="wd-dashboard-title">
-        Dashboard
-        {isStudent && (
-          <button
-            onClick={() => setEnrolling(!enrolling)}
-            className="float-end btn btn-primary"
-          >
-            {enrolling ? "My Courses" : "All Courses"}
-          </button>
-        )}
-      </h1>
-      <hr />
-
+      <h1 id="wd-dashboard-title">Dashboard
+      <button onClick={() => setEnrolling(!enrolling)} className="float-end btn btn-primary" >
+          {enrolling ? "My Courses" : "All Courses"}
+        </button>
+        </h1> <hr />
       {isFaculty && (
         <>
           <h5>
@@ -127,7 +94,8 @@ export default function Dashboard({
               id="wd-add-new-course-click"
               onClick={addNewCourse}
             >
-              Add
+              {" "}
+              Add{" "}
             </button>
             <button
               className="btn btn-warning float-end me-2"
@@ -146,17 +114,27 @@ export default function Dashboard({
           <textarea
             value={course.description}
             className="form-control"
-            onChange={(e) => setCourse({ ...course, description: e.target.value })}
+            onChange={(e) =>
+              setCourse({ ...course, description: e.target.value })
+            }
           />
           <hr />
         </>
       )}
-
+      {isStudent && (
+        <button
+          className="btn btn-primary  float-end mb-3"
+          onClick={toggleCourseList}
+        >
+          {showAllCourses ? "Show Enrolled Courses" : "Show All Course"}
+        </button>
+      )}
       <h2 id="wd-dashboard-published">
-        {enrolling ? "All Courses" : `My Courses (${localCourses.length})`}
-      </h2>
+        {showAllCourses
+          ? "Published Courses (" + localCourses.length + ")"
+          : "Enrolled Courses (" + localCourses.length + ")"}
+      </h2>{" "}
       <hr />
-
       <div id="wd-dashboard-courses" className="row">
         <div className="row row-cols-1 row-cols-md-5 g-4">
           {localCourses.map((course: any) => (
@@ -164,8 +142,11 @@ export default function Dashboard({
               key={course._id}
               className="wd-dashboard-course col"
               style={{ width: "300px" }}
+              
             >
+              
               <small>Course ID: {course._id}</small>
+
               <div className="card rounded-3 overflow-hidden">
                 <ProtectedRoute>
                   <Link
@@ -203,21 +184,18 @@ export default function Dashboard({
                       </Link>
 
                       {enrolling && (
-                        <button
-                          onClick={(event) => {
-                            event.preventDefault();
-                            updateEnrollment(course._id, !course.enrolled);
-                          }}
-                          className={`btn ${
-                            course.enrolled ? "btn-danger" : "btn-success"
-                          } float-end`}
-                        >
-                          {course.enrolled ? "Unenroll" : "Enroll"}
-                        </button>
-                      )}
+              <button onClick={(event) => {
+                event.preventDefault();
+                updateEnrollment(course._id, !course.enrolled);
+              }}
+              className={`btn ${ course.enrolled ? "btn-danger" : "btn-success" } float-end`} >
+        {course.enrolled ? "Unenroll" : "Enroll"}
+      </button>
+
+  )}
+
 
                       {isStudent &&
-                        !enrolling &&
                         (enrolledCourses.some((c) => c._id === course._id) ? (
                           <button
                             className="btn btn-danger float-end"
@@ -239,7 +217,6 @@ export default function Dashboard({
                             Enroll
                           </button>
                         ))}
-
                       {isFaculty && (
                         <>
                           <button
@@ -260,8 +237,8 @@ export default function Dashboard({
                               console.log("Course ID:", course._id);
                               setCourse({
                                 ...course,
-                                _id: course._id,
-                              });
+                                _id: course._id  
+                            });
                             }}
                             className="btn btn-warning me-2 float-end"
                           >

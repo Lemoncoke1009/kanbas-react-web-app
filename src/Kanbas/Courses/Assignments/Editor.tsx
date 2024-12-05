@@ -1,209 +1,117 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router";
+import { Link, useLocation } from "react-router-dom";
+//import * as db from "../../Database";
+import { addAssignment, setAssignment, setAssignments, updateAssignment } from "./reducer";
 import { useDispatch, useSelector } from "react-redux";
-import { addAssignment, updateAssignment } from "./reducer"; 
+import { useState } from "react";
+import * as assignmentClient from "./client";
 
 export default function AssignmentEditor() {
-  const { cid, aid } = useParams(); 
-  const navigate = useNavigate();
+  const { aid } = useParams();
+  const { cid } = useParams();
+  //const assignment = db.assignments;
+  const { assignment } = useSelector((state: any) => state.assignmentReducer);
   const dispatch = useDispatch();
-  const assignments = useSelector((state: any) => state.assignmentsReducer);
-  
-  const [assignment, setAssignment] = useState<any>({
-    title: "",
-    description: "",
-    points: 100,
-    dueDate: "",
-    availableFrom: "",
-    availableUntil: "",
-  });
-
-  const [assignedTo, setAssignedTo] = useState(["Everyone"]);
-  const [inputValue, setInputValue] = useState("");
-
-  useEffect(() => {
-    if (aid && aid !== 'new') {
-      const foundAssignment = assignments.find(
-        (assignment: any) => assignment._id === aid
-      );
-      if (foundAssignment) {
-        setAssignment(foundAssignment);
-      }
-    }
-  }, [aid, assignments]);
-
-  const addTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && inputValue.trim() !== "") {
-      setAssignedTo([...assignedTo, inputValue.trim()]);
-      setInputValue("");
-    }
-  };
-
-  const handleSave = () => {
-    console.log('Saving assignment...', assignment);
-    if (aid && aid !== 'new') {
-      dispatch(updateAssignment({ ...assignment, _id: aid }));
+  const navigate = useNavigate();
+  const handleSave = async () => {
+    if (aid === "new") {
+      await assignmentClient.createNewAssignment(assignment);
+      dispatch(addAssignment({
+        ...assignment
+      }));
     } else {
-      const newAssignment = {
-        ...assignment,
-        _id: new Date().getTime().toString(),
-        course: cid,
-      };
-      console.log('Adding new assignment:', newAssignment);
-      dispatch(addAssignment(newAssignment));
+      await assignmentClient.updateAssignment(assignment);
+      dispatch(updateAssignment({
+        ...assignment
+      }));
     }
     navigate(`/Kanbas/Courses/${cid}/Assignments`);
   };
-
   return (
-    assignment && (
-      <div id="wd-assignments-editor" className="p-4 mx-auto" style={{ maxWidth: "600px" }}>
-        <div className="mb-3">
-          <label htmlFor="wd-name" className="form-label fw-bold">
-            Assignment Name
-          </label>
-          <input
-            id="wd-name"
-            value={assignment.title}
-            onChange={(e) => setAssignment({ ...assignment, title: e.target.value })}
-            className="form-control"
-          />
+    <div id="wd-assignments-editor" className="me-4">
+      <div>
+        <label htmlFor="wd-name" className="mb-2"><b>Assignment Name</b></label>
+        <input id="wd-name" defaultValue={assignment.title} className="form-control mb-4" onChange={(e) => dispatch(setAssignment({ ...assignment, title: e.target.value }))} />
+        <textarea id="wd-description" className="form-control mb-4" onChange={(e) => dispatch(setAssignment({ ...assignment, description: e.target.value }))} >
+          {assignment.description}
+        </textarea>
+        <div className="row">
+          <label htmlFor="wd-points" className="col"><span className="float-end me-2">Points</span></label>
+          <input id="wd-points" defaultValue={assignment.points} className="form-control mb-3 col" onChange={(e) =>
+            dispatch(setAssignment({ ...assignment, points: e.target.value }))
+          } />
         </div>
-
-        <div className="mb-3">
-          <div className="form-control" id="wd-description">
-            <p>The assignment is <span className="text-danger">available online</span>.</p>
-            <p>
-              Submit a link to the landing page of your Web application running on{" "}
-              <a href="https://www.netlify.com/" target="_blank" rel="noreferrer">
-                Netlify
-              </a>.
-            </p>
-            <p>The landing page should include the following:</p>
-            <ul>
-              <li>Your full name and section</li>
-              <li>Links to each of the lab assignments</li>
-              <li>
-                Link to the{" "}
-                <a href="#https://www.netlify.com/" target="_blank" rel="noreferrer">
-                  Kanbas application
-                </a>
-              </li>
-              <li>Links to all relevant source code repositories</li>
-            </ul>
-            <p>
-              The{" "}
-              <a href="https://www.netlify.com/" target="_blank" rel="noreferrer">
-                Kanbas application
-              </a>{" "}
-              should include a link to navigate back to the landing page.
-            </p>
-          </div>
+        <div className="row">
+          <label htmlFor="wd-group" className="col"><span className="float-end me-2">Assignment Group</span></label>
+          <select id="wd-group" name="Assignment Groups" className="form-select mb-3 col">
+            <option value="option1">ASSIGNMENTS</option>
+          </select>
         </div>
-
-        <div className="row mb-3">
-          <div className="col-sm-3 text-sm-end">
-            <label htmlFor="wd-points" className="form-label fw-bold">Points</label>
-          </div>
-          <div className="col-sm-9">
-            <input
-              id="wd-points"
-              type="number"
-              value={assignment.points}
-              onChange={(e) => setAssignment({ ...assignment, points: parseInt(e.target.value) })}
-              className="form-control"
-            />
-          </div>
+        <div className="row">
+          <label htmlFor="wd-display-grade-as" className="col"><span className="float-end me-2">Display Grade as</span></label>
+          <select id="wd-display-grade-as" name="Display grade as" className="form-select mb-3 col">
+            <option value="option1">Percentage</option>
+            <option value="option2">Letter</option>
+          </select>
         </div>
-
-        <div className="row mb-3">
-          <div className="col-sm-3 text-sm-end">
-            <label htmlFor="wd-submission-type" className="form-label fw-bold">Submission Type</label>
-          </div>
-          <div className="col-sm-9">
-            <select id="wd-submission-type" className="form-select">
-              <option value="online">Online</option>
-              <option value="paper">On Paper</option>
-              <option value="external">External Tool</option>
+        <div className="row">
+          <label htmlFor="wd-submission-type" className="col"><span className="float-end me-2">Submission type</span></label>
+          <div className="border border-secondary rounded p-3 mb-3 col">
+            <select id="wd-submission-type" name="submission type" className="form-select mb-3">
+              <option value="option1">Online</option>
+              <option value="option2">In person</option>
             </select>
+
+            <label className="mb-2"><b>Online Entry Options</b></label><br />
+
+            <input type="checkbox" name="check-genre" id="wd-text-entry" className="form-check-input me-2" />
+            <label htmlFor="wd-text-entry" className="form-check-label mb-2">Text Entry</label><br />
+
+            <input type="checkbox" name="check-genre" id="wd-website-url" className="form-check-input me-2" />
+            <label htmlFor="wd-webiste-url" className="form-check-label mb-2">Website URL</label><br />
+
+            <input type="checkbox" name="check-genre" id="wd-media-recordings" className="form-check-input me-2" />
+            <label htmlFor="wd-media-recordings" className="form-check-label mb-2">Media Recordings</label><br />
+
+            <input type="checkbox" name="check-genre" id="wd-student-annotation" className="form-check-input me-2" />
+            <label htmlFor="wd-student-annotation" className="form-check-label mb-2">Student Annotation</label><br />
+
+            <input type="checkbox" name="check-genre" id="wd-file-upload" className="form-check-input me-2" />
+            <label htmlFor="wd-file-upload" className="form-check-label mb-2">File Uploads</label>
           </div>
         </div>
+        <div className="row">
+          <label htmlFor="wd-assign-to" className="col"><span className="float-end me-2">Assign</span></label>
+          <div className="border border-secondary rounded p-3 mb-3 col">
+            <label htmlFor="wd-assign-to"><b>Assign to</b></label><br />
+            <input id="wd-assign-to" value="Everyone" className="form-control mb-2" />
 
-        <div className="row mb-3">
-          <div className="col-sm-3 text-sm-end">
-            <label htmlFor="wd-assignment-group" className="form-label fw-bold">Assignment Group</label>
-          </div>
-          <div className="col-sm-9">
-            <select id="wd-assignment-group" className="form-select">
-              <option value="labs">Labs</option>
-              <option value="quizzes">Quizzes</option>
-              <option value="projects">Projects</option>
-            </select>
-          </div>
-        </div>
+            <label htmlFor="wd-due-date"><b>Due</b></label><br />
+            <input type="datetime-local" id="wd-due-date" defaultValue={assignment.due} onChange={(e) =>
+              dispatch(setAssignment({ ...assignment, due: e.target.value }))
+            } className="form-control mb-2" />
 
-        <div className="row mb-3">
-          <div className="col-sm-3 text-sm-end">
-            <label className="form-label fw-bold">Assign</label>
-          </div>
-          <div className="col-sm-9">
-            <div className="p-3 border rounded">
-              <div className="mb-3">
-                <label htmlFor="wd-assign-to" className="form-label fw-bold">Assign to</label>
-                <input
-                  id="wd-assign-to"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={addTag}
-                  className="form-control mb-3"
-                  placeholder="Assign to..."
-                />
-                <div className="row g-3">
-                  <div className="col-md-12">
-                    <label htmlFor="wd-due-date" className="form-label fw-bold">Due</label>
-                    <input
-                      id="wd-due-date"
-                      type="datetime-local"
-                      value={assignment.dueDate}
-                      onChange={(e) => setAssignment({ ...assignment, dueDate: e.target.value })}
-                      className="form-control"
-                    />
-                  </div>
-
-                  <div className="col-md-6 mt-3">
-                    <label htmlFor="wd-available-from" className="form-label fw-bold">Available from</label>
-                    <input
-                      id="wd-available-from"
-                      type="datetime-local"
-                      value={assignment.availableFrom}
-                      onChange={(e) => setAssignment({ ...assignment, availableFrom: e.target.value })}
-                      className="form-control"
-                    />
-                  </div>
-
-                  <div className="col-md-6 mt-3">
-                    <label htmlFor="wd-available-until" className="form-label fw-bold">Until</label>
-                    <input
-                      id="wd-available-until"
-                      type="datetime-local"
-                      value={assignment.availableUntil}
-                      onChange={(e) => setAssignment({ ...assignment, availableUntil: e.target.value })}
-                      className="form-control"
-                    />
-                  </div>
-                </div>
+            <div className="row">
+              <div className="col">
+                <label htmlFor="wd-available-from"><b>Available From</b></label>
+                <input type="datetime-local" id="wd-available-from" defaultValue={assignment.unlock} className="form-control mb-2" onChange={(e) =>
+                  dispatch(setAssignment({ ...assignment, unlock: e.target.value }))
+                } />
+              </div>
+              <div className="col">
+                <label htmlFor="wd-available-until"><b>Until</b></label>
+                <input type="datetime-local" id="wd-available-until" defaultValue={assignment.due} className="form-control mb-2" />
               </div>
             </div>
           </div>
         </div>
-
-        <div className="mt-4 d-flex justify-content-end">
-          <Link to={`/Kanbas/Courses/${cid}/Assignments`} className="btn btn-secondary me-2">
-            Cancel
-          </Link>
-          <button onClick={handleSave} className="btn btn-danger">Save</button>
-        </div>
       </div>
-    )
+      <hr />
+      <button onClick={handleSave} className="btn btn-lg btn-danger me-1 float-end">Save</button>
+      <Link to={`/Kanbas/Courses/${cid}/Assignments`}>
+        <button className="btn btn-lg btn-secondary me-1 float-end">Cancel</button>
+      </Link>
+
+    </div>
   );
 }

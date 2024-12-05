@@ -36,21 +36,39 @@ export default function Dashboard({
   const [enrolledCourses, setEnrolledCourses] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchEnrolledCourses = async () => {
-      if (enrolling) {
-        const allCourses = await courseClient.fetchAllCourses();
-        setLocalCourses(allCourses);
-      } else {
-        const myCourses = await accountClient.findMyCourses();
-        setLocalCourses(myCourses);
-        setEnrolledCourses(myCourses);
+    const fetchCourses = async () => {
+      try {
+        if (!currentUser?._id) return;
+  
+        if (enrolling) {
+          const allCourses = await courseClient.fetchAllCourses();
+          const myEnrolledCourses = await accountClient.findMyCourses();
+          const coursesWithEnrollment = allCourses.map((course: { _id: any; }) => ({
+            ...course,
+            enrolled: myEnrolledCourses.some((c: { _id: any; }) => c._id === course._id)
+          }));
+          setLocalCourses(coursesWithEnrollment);
+          setEnrolledCourses(myEnrolledCourses);
+        } else {
+          const myEnrolledCourses = await accountClient.findMyCourses();
+          setLocalCourses(myEnrolledCourses);
+          setEnrolledCourses(myEnrolledCourses);
+        }
+      } catch (error) {
+        console.error("Error fetching courses:", error);
       }
     };
-    fetchEnrolledCourses();
+  
+    fetchCourses();
   }, [currentUser, enrolling]);
 
   const handleEnroll = async (courseId: string) => {
     try {
+      if (!currentUser?._id) {
+        console.error("No user ID found");
+        return;
+      }
+      console.log("Enrolling user:", currentUser._id, "in course:", courseId);
       await enrollmentClient.enrollCourse(currentUser._id, courseId);
       const updatedCourses = await accountClient.findMyCourses();
       setEnrolledCourses(updatedCourses);
@@ -68,6 +86,20 @@ export default function Dashboard({
       dispatch(unenrollCourse({ userId: currentUser._id, courseId }));
     } catch (error) {
       console.error("Unenrollment failed:", error);
+    }
+  };
+
+  const handleUpdateEnrollment = async (courseId: string, enrolled: boolean) => {
+    try {
+      if (!currentUser?._id) return;
+      
+      if (enrolled) {
+        await handleEnroll(courseId);
+      } else {
+        await handleUnenroll(courseId);
+      }
+    } catch (error) {
+      console.error("Error updating enrollment:", error);
     }
   };
 

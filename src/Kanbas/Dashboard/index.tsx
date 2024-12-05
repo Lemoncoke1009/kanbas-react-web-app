@@ -63,9 +63,6 @@ export default function Dashboard(
     fetchAllEnrollments();
   }, []);
 
-    // Need to figure out if I need to allow student's too enroll in courses... That was the point of this statement
-    // But I got rid of the filter part because that's what A5 told me to
-
 
   return (
     <div className="p-4" id="wd-dashboard">
@@ -114,21 +111,7 @@ export default function Dashboard(
                     <p className="wd-dashboard-course-title card-text overflow-y-hidden" style={{ maxHeight: 100 }}>
                       {course.description} </p>
                     <button className="btn btn-primary"> Go </button>
-                    {/* {currentUser.role === "STUDENT" && (
-                      <button
-                        className={`btn ${
-                          isEnrolled(course._id)
-                            ? "btn-danger"
-                            : "btn-success"
-                        } float-end`}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleToggleEnrollment(course._id);
-                        }}
-                      >
-                        {isEnrolled(course._id) ? "Unenroll" : "Enroll"}
-                      </button>
-                    )} */}
+  
                     {enrolling && (
                       <button className={`btn ${ course.enrolled ? "btn-danger" : "btn-success" } float-end`} 
                         onClick={(event) => {

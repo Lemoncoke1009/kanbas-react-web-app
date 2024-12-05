@@ -61,14 +61,6 @@ export default function Kanbas() {
     }
   };
 
-  // const fetchCourses = async () => {
-  //   try {
-  //     const courses = await courseClient.fetchAllCourses();
-  //     setCourses(courses);
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
   
   useEffect(() => {
     if (enrolling) {

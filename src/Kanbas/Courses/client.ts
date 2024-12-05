@@ -53,16 +53,19 @@ export const updateCourse = async (course: any) => {
 export const findModulesForCourse = async (courseId: string) => {
   try {
     console.log("Finding modules for course:", courseId);
-    const response = await axiosWithCredentials.get(`${COURSES_API}/${courseId}/modules`);
-    console.log("Raw response:", response);
-
-    const modules = Array.isArray(response.data) ? response.data : 
-                   Object.keys(response.data).length === 0 ? [] : 
-                   Object.values(response.data);
-    console.log("Processed modules:", modules);
-    return modules;
+    const response = await axiosWithCredentials.get(
+      `${REMOTE_SERVER}/api/courses/${courseId}/modules`
+    );
+    
+    if (Array.isArray(response.data)) {
+      console.log("Received modules array:", response.data);
+      return response.data;
+    } else {
+      console.warn("Unexpected response format:", response.data);
+      return [];
+    }
   } catch (error) {
-    console.error("Error in findModulesForCourse:", error);
+    console.error("Error finding modules:", error);
     return [];
   }
 };

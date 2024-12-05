@@ -9,8 +9,7 @@ export default function Signin() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const signin = async () => {
-    const user =  await client.signin(credentials);
-
+    const user = await client.signin(credentials);
     if (!user) return;
     dispatch(setCurrentUser(user));
     navigate("/Kanbas/Dashboard");
@@ -18,23 +17,15 @@ export default function Signin() {
 
   return (
     <div id="wd-signin-screen">
-      <h1>Sign in</h1>
-      <input 
-      defaultValue={credentials.username}
-      onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
-      
-      id="wd-username"
-             placeholder="username"
-             className="form-control mb-2"/>
-      <input 
-      defaultValue={credentials.password}
-      onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-      
-      id="wd-password"
-             placeholder="password" type="password"
-             className="form-control mb-2"/>
-     <button onClick={signin} id="wd-signin-btn" className="btn btn-primary w-100" > Sign in </button>
-      <Link id="wd-signup-link" to="/Kanbas/Account/Signup">Sign up</Link>
+      <h3>Sign in</h3>
+      <input id="wd-username" placeholder="username" className="form-control mb-2"
+        defaultValue={credentials.username}
+        onChange={(e) => setCredentials({ ...credentials, username: e.target.value })} />
+      <input id="wd-password" placeholder="password" type="password" className="form-control mb-2"
+        defaultValue={credentials.password}
+        onChange={(e) => setCredentials({ ...credentials, password: e.target.value })} />
+      <button onClick={signin} id="wd-signin-btn" className="btn btn-primary w-100" > Sign in </button>
+      <Link id="wd-signup-link" to="/Kanbas/Account/Signup"> Sign up </Link>
     </div>
-);}
-
+  );
+}

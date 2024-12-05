@@ -1,53 +1,43 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
-// Define interfaces for your data structures
-interface Module {
-  _id: string;
-  name: string;
-  course: string;
-  lessons?: any[];  
-  editing?: boolean;
-}
-
-interface ModulesState {
-  modules: Module[];
-}
-
-const initialState: ModulesState = {
+const initialState = {
   modules: [],
 };
 
 const modulesSlice = createSlice({
   name: "modules",
   initialState,
+  
   reducers: {
-    setModules: (state, action: PayloadAction<Module[]>) => {
-      state.modules = Array.isArray(action.payload) ? action.payload : [];
+    setModules: (state, action) => {
+      state.modules = action.payload;
     },
-
-    addModule: (state, action: PayloadAction<Module>) => {
-      state.modules.push(action.payload);
+    addModule: (state, { payload: module }) => {
+      const newModule: any = {
+        _id: new Date().getTime().toString(),
+        lessons: [],
+        name: module.name,
+        course: module.course,
+      };
+      state.modules = [...state.modules, newModule] as any;
     },
-
-    deleteModule: (state, action: PayloadAction<string>) => {
-      state.modules = state.modules.filter(m => m._id !== action.payload);
+    deleteModule: (state, { payload: moduleId }) => {
+      state.modules = state.modules.filter(
+        (m: any) => m._id !== moduleId);
     },
-
-    updateModule: (state, action: PayloadAction<Module>) => {
-      state.modules = state.modules.map(m =>
-        m._id === action.payload._id ? action.payload : m
-      );
+    updateModule: (state, { payload: module }) => {
+      state.modules = state.modules.map((m: any) =>
+        m._id === module._id ? module : m
+      ) as any;
     },
-
-    editModule: (state, action: PayloadAction<string>) => {
-      state.modules = state.modules.map(m =>
-        m._id === action.payload ? { ...m, editing: true } : m
-      );
+    editModule: (state, { payload: moduleId }) => {
+      state.modules = state.modules.map((m: any) =>
+        m._id === moduleId ? { ...m, editing: true } : m
+      ) as any;
     },
   },
+
 });
 
-export const { addModule, deleteModule, updateModule, editModule, setModules } =
-  modulesSlice.actions;
-
+export const { addModule, deleteModule, updateModule, editModule, setModules } = modulesSlice.actions;
 export default modulesSlice.reducer;

@@ -1,33 +1,38 @@
 import { createSlice } from "@reduxjs/toolkit";
-import * as db from "../../Database";
 
-const initialState = [...db.assignments];  // Ensure a copy of the original assignments
+const initialState = {
+  assignments: [],
+};
 
 const assignmentsSlice = createSlice({
   name: "assignments",
-  initialState: [...db.assignments],
+  initialState,
+
   reducers: {
-    addAssignment: (state, action) => {
-      console.log('Current state:', state);
-      console.log('New assignment:', action.payload);
-      return [...state, action.payload];  
+    setAssignments: (state, action) => {
+      state.assignments = action.payload;
     },
-    deleteAssignment: (state, action) => {
-      console.log('Deleting assignment:', action.payload);
-      return state.filter((assignment) => assignment._id !== action.payload);
+    addAssignment: (state, { payload: assignment }) => {
+      const newAssignment: any = {
+        _id: new Date().getTime().toString(),
+        course: assignment.course,
+        title: assignment.title,
+      };
+      state.assignments = [...state.assignments, newAssignment] as any;
     },
-    updateAssignment: (state, action) => {
-      const index = state.findIndex(
-        (assignment) => assignment._id === action.payload._id
-      );
-      if (index !== -1) {
-        console.log('Updating assignment at index:', index);
-        state[index] = action.payload;
-      }
+    deleteAssignment: (state, { payload: assignmentId }) => {
+      state.assignments = state.assignments.filter(
+        (a: any) => a._id !== assignmentId);
+    },
+    updateAssignment: (state, { payload: assignment }) => {
+      state.assignments = state.assignments.map((a: any) =>
+        a._id === assignment._id ? assignment : a
+      ) as any;
     },
   },
+
 });
 
-export const { addAssignment, deleteAssignment, updateAssignment } =
+export const { addAssignment, deleteAssignment, updateAssignment, setAssignments } =
   assignmentsSlice.actions;
 export default assignmentsSlice.reducer;

@@ -8,11 +8,18 @@ interface Course {
 }
 
 export const createModuleForCourse = async (courseId: string, module: any) => {
-  const response = await axiosWithCredentials.post(
-    `${COURSES_API}/${courseId}/modules`,
-    module
-  );
-  return response.data;
+  try {
+    console.log("Creating module for course:", courseId, module);
+    const response = await axiosWithCredentials.post(
+      `${COURSES_API}/${courseId}/modules`,
+      module
+    );
+    console.log("Create module response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating module:", error);
+    throw error;
+  }
 };
 
 export const createCourse = async (course: any) => {

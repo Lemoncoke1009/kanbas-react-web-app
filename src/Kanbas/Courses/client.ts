@@ -53,9 +53,14 @@ export const updateCourse = async (course: any) => {
 export const findModulesForCourse = async (courseId: string) => {
   try {
     console.log("Finding modules for course:", courseId);
-    const { data } = await axiosWithCredentials.get(`${COURSES_API}/${courseId}/modules`);
-    console.log("API response:", data);
-    return Array.isArray(data) ? data : [];
+    const response = await axiosWithCredentials.get(`${COURSES_API}/${courseId}/modules`);
+    console.log("Raw response:", response);
+
+    const modules = Array.isArray(response.data) ? response.data : 
+                   Object.keys(response.data).length === 0 ? [] : 
+                   Object.values(response.data);
+    console.log("Processed modules:", modules);
+    return modules;
   } catch (error) {
     console.error("Error in findModulesForCourse:", error);
     return [];

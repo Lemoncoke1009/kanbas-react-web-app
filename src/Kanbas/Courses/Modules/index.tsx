@@ -29,12 +29,22 @@ export default function Modules() {
 
   const fetchModules = async () => {
     try {
+      if (!cid) {
+        console.warn("No course ID provided");
+        return;
+      }
       console.log("Fetching modules for course:", cid);
-      const modules = await coursesClient.findModulesForCourse(cid as string);
+      const modules = await coursesClient.findModulesForCourse(cid);
       console.log("Fetched modules:", modules);
-      dispatch(setModules(modules));
+      if (!Array.isArray(modules)) {
+        console.warn("Received non-array response:", modules);
+        dispatch(setModules([]));
+      } else {
+        dispatch(setModules(modules));
+      }
     } catch (error) {
       console.error("Error fetching modules:", error);
+      dispatch(setModules([]));
     }
   };
   useEffect(() => {

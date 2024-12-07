@@ -1,8 +1,9 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import { Editor } from '@tinymce/tinymce-react';
 import {useNavigate} from "react-router-dom";
 import * as client from "../client";
 import {useParams} from "react-router";
+import NewQuestion from "./NewQuestion";
 
 export default function NewQuiz() {
   const [name, setName] = useState("Unnamed Quiz")
@@ -14,24 +15,101 @@ export default function NewQuiz() {
   const [timeLimit, setTimeLimit] = useState(false)
   const [timeLimitMinutes, setTimeLimitMinutes] = useState('20')
   const [allowMultipleAttempts, setAllowMultipleAttempts] = useState(false)
+  const [showCorrectAnswers, setShowCorrectAnswers] = useState(false)
+  const [accessCode, setAccessCode] = useState('')
+  const [oneQuestionAtATime, setOneQuestionAtATime] = useState(true)
+  const [webcamRequired, setWebcamRequired] = useState(false)
+  const [lockQuestionsAfterAnswering, setLockQuestionsAfterAnswering] = useState(false)
+  const [dates, setDates] = useState([
+    { _id: new Date().getTime().toString(), due: '', availableFrom: '', until: '' }
+  ])
+
+  const [questions, setQuestions] = useState([])
+
+  const [editQuiz, setEditQuiz] = useState<any>()
 
   const navigate = useNavigate()
-  const { cid } = useParams();
+  const { cid, qid } = useParams();
 
-  const save = async () => {
+  useEffect(() => {
+    getQuiz()
+  }, [qid])
+
+  const getQuiz = async () => {
+    if (qid) {
+      const quiz = await client.getQuizById(qid)
+      setEditQuiz(quiz)
+      setName(quiz.name)
+      setEditorData(quiz.content)
+      setQuizType(quiz.quizType)
+      setAssignmentGroup(quiz.assignmentGroup)
+      setShuffleAnswers(quiz.shuffleAnswers)
+      setTimeLimit(quiz.timeLimit)
+      setTimeLimitMinutes(quiz.timeLimitMinutes)
+      setAllowMultipleAttempts(quiz.allowMultipleAttempts)
+
+      setShowCorrectAnswers(quiz.showCorrectAnswers)
+      setAccessCode(quiz.accessCode)
+      setOneQuestionAtATime(quiz.oneQuestionAtATime)
+      setWebcamRequired(quiz.webcamRequired)
+      setLockQuestionsAfterAnswering(quiz.lockQuestionsAfterAnswering)
+      setDates(quiz.dates || [])
+      setQuestions(quiz.questions || [])
+    }
+  }
+
+  const save = async (publish: boolean) => {
     if (cid) {
-      const quiz = await client.createQuizForCourse(cid, {
-        name,
-        content: editorData,
-        quizType,
-        assignmentGroup,
-        shuffleAnswers,
-        timeLimit,
-        timeLimitMinutes,
-        allowMultipleAttempts
-      });
+      if (editQuiz && qid) {
+        await client.updateQuiz(qid, {
+          name,
+          content: editorData,
+          quizType,
+          assignmentGroup,
+          shuffleAnswers,
+          timeLimit,
+          timeLimitMinutes,
+          allowMultipleAttempts,
+          showCorrectAnswers,
+          accessCode,
+          oneQuestionAtATime,
+          webcamRequired,
+          lockQuestionsAfterAnswering,
+          dates,
+          publish
+        });
+      } else {
+        await client.createQuizForCourse(cid, {
+          name,
+          content: editorData,
+          quizType,
+          assignmentGroup,
+          shuffleAnswers,
+          timeLimit,
+          timeLimitMinutes,
+          allowMultipleAttempts,
+          showCorrectAnswers,
+          accessCode,
+          oneQuestionAtATime,
+          webcamRequired,
+          lockQuestionsAfterAnswering,
+          dates,
+          publish
+        });
+      }
+      if (!publish) {
+        navigate(`/Kanbas/Courses/${cid}/Quizzes/Detail/${qid}`)
+      } else {
+        navigate(`/Kanbas/Courses/${cid}/Quizzes`)
+      }
+    }
+  }
 
-      navigate(-1)
+  const handleQuestionsSave = async () => {
+    if (qid) {
+      await client.updateQuiz(qid, {
+        questions
+      });
     }
   }
 
@@ -40,14 +118,14 @@ export default function NewQuiz() {
       <div className="flex-grow-1 d-flex align-items-center justify-content-end py-3 border-bottom mb-4">
         <div className="d-flex align-items-center gap-2">
           <div className="d-flex align-items-center gap-3">
-            <div className="text-dark-emphasis fw-semibold">Points 0</div>
+            <div className="text-dark-emphasis fw-semibold">Points {questions ? questions.reduce((total: number, item: any) => total += +item.points, 0) : 0}</div>
             <div className="d-flex align-items-center gap-1 text-body-tertiary">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-ban"
                    viewBox="0 0 16 16">
                 <path
                   d="M15 8a6.97 6.97 0 0 0-1.71-4.584l-9.874 9.875A7 7 0 0 0 15 8M2.71 12.584l9.874-9.875a7 7 0 0 0-9.874 9.874ZM16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0"/>
               </svg>
-              Not Published
+              { editQuiz ? (editQuiz.publish ? 'Published' : 'Not Published') : 'Not Published' }
             </div>
           </div>
           <button type="button" className="btn btn-light border">
@@ -143,14 +221,45 @@ export default function NewQuiz() {
                       </label>
                     </div>
                   </div>
-                  <div className="p-2 border my-2 rounded">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="allow_multiple_attempts" checked={allowMultipleAttempts} onChange={e => setAllowMultipleAttempts(e.target.checked)} />
-                      <label className="form-check-label" htmlFor="allow_multiple_attempts">
-                        Allow Multiple Attempts
-                      </label>
-                    </div>
+                  <div className="form-check my-2">
+                    <input className="form-check-input" type="checkbox" value="" id="multiple_attempts" checked={allowMultipleAttempts} onChange={e => setAllowMultipleAttempts(e.target.checked)} />
+                    <label className="form-check-label" htmlFor="multiple_attempts">
+                      Multiple Attempts
+                    </label>
                   </div>
+                  <div className="form-check my-2">
+                    <input className="form-check-input" type="checkbox" value="" id="show_correct_answers" checked={showCorrectAnswers} onChange={e => setShowCorrectAnswers(e.target.checked)} />
+                    <label className="form-check-label" htmlFor="show_correct_answers">
+                      Show Correct Answers
+                    </label>
+                  </div>
+                  <div className="form-check my-2">
+                    <input className="form-check-input" type="checkbox" value="" id="one_question_at_a_time" checked={oneQuestionAtATime} onChange={e => setOneQuestionAtATime(e.target.checked)} />
+                    <label className="form-check-label" htmlFor="one_question_at_a_time">
+                      One Question at a Time
+                    </label>
+                  </div>
+                  <div className="form-check my-2">
+                    <input className="form-check-input" type="checkbox" value="" id="webcam_required " checked={webcamRequired} onChange={e => setWebcamRequired(e.target.checked)} />
+                    <label className="form-check-label" htmlFor="webcam_required">
+                      Webcam Required
+                    </label>
+                  </div>
+                  <div className="form-check my-2">
+                    <input className="form-check-input" type="checkbox" value="" id="lock_questions_after_answering " checked={lockQuestionsAfterAnswering} onChange={e => setLockQuestionsAfterAnswering(e.target.checked)} />
+                    <label className="form-check-label" htmlFor="lock_questions_after_answering">
+                      Lock Questions After Answering
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="row g-3 align-items-center mb-3">
+                <div className="col-2 text-end">
+                  Access Code
+                </div>
+                <div className="col-10">
+                  <input className="form-control w-25" type="text" id="access_code" value={accessCode} onChange={e => setAccessCode(e.target.value)} />
                 </div>
               </div>
 
@@ -171,53 +280,43 @@ export default function NewQuiz() {
                         </svg>
                       </div>
                     </div>
-                    <div className="text-dark-emphasis fw-semibold mb-2">Due</div>
-                    <div className="input-group mb-3">
-                      <input type="text" className="form-control" />
-                      <span className="input-group-text" id="basic-addon2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                       className="bi bi-calendar2-week" viewBox="0 0 16 16">
-                    <path
-                      d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/>
-                    <path
-                      d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5zM11 7.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm-3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm-5 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5z"/>
-                  </svg>
-                </span>
-                    </div>
-                    <div className="d-flex align-items-center gap-2">
-                      <div>
-                        <div className="text-dark-emphasis fw-semibold mb-2">Available from</div>
-                        <div className="input-group mb-3">
-                          <input type="text" className="form-control" />
-                          <span className="input-group-text">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                       className="bi bi-calendar2-week" viewBox="0 0 16 16">
-                    <path
-                      d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/>
-                    <path
-                      d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5zM11 7.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm-3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm-5 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5z"/>
-                  </svg>
-                </span>
+                    {
+                      dates.map(item => (
+                        <div key={item._id}>
+                          <div className="text-dark-emphasis fw-semibold mb-2">Due</div>
+                          <div className="input-group mb-3">
+                            <input type="date" className="form-control" value={item.due} onChange={e => {
+                              item.due = e.target.value
+                              setDates([...dates])
+                            }} />
+                          </div>
+                          <div className="d-flex align-items-center gap-2">
+                            <div className="flex-grow-1">
+                              <div className="text-dark-emphasis fw-semibold mb-2">Available from</div>
+                              <div className="input-group mb-3">
+                                <input type="date" className="form-control" value={item.availableFrom} onChange={e => {
+                                  item.availableFrom = e.target.value
+                                  setDates([...dates])
+                                }} />
+                              </div>
+                            </div>
+                            <div className="flex-grow-1">
+                              <div className="text-dark-emphasis fw-semibold mb-2">Until</div>
+                              <div className="input-group mb-3">
+                                <input type="date" className="form-control" value={item.until} onChange={e => {
+                                  item.until = e.target.value
+                                  setDates([...dates])
+                                }} />
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      <div>
-                        <div className="text-dark-emphasis fw-semibold mb-2">Until</div>
-                        <div className="input-group mb-3">
-                          <input type="text" className="form-control" />
-                          <span className="input-group-text">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                       className="bi bi-calendar2-week" viewBox="0 0 16 16">
-                    <path
-                      d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/>
-                    <path
-                      d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5zM11 7.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm-3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm-5 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5z"/>
-                  </svg>
-                </span>
-                        </div>
-                      </div>
-                    </div>
+                      ))
+                    }
                   </div>
-                  <div className="d-flex align-items-center justify-content-center bg-light border rounded p-2 w-50">
+                  <div className="d-flex align-items-center justify-content-center bg-light border rounded p-2 w-50" onClick={() => {
+                    setDates([...dates,  { _id: new Date().getTime().toString(), due: '', availableFrom: '', until: '' }])
+                  }}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-plus"
                          viewBox="0 0 16 16">
                       <path
@@ -228,29 +327,15 @@ export default function NewQuiz() {
                 </div>
 
                 <div className="d-flex align-items-center justify-content-center gap-3 p-3 border-top">
-                  <button type="button" className="btn btn-light" onClick={() => navigate('-1')}>Cancel</button>
-                  <button type="button" className="btn btn-danger" onClick={save}>Save</button>
+                  <button type="button" className="btn btn-light" onClick={() => navigate(-1)}>Cancel</button>
+                  <button type="button" className="btn btn-danger" onClick={() => save(false)}>Save</button>
+                  <button type="button" className="btn btn-danger" onClick={() => save(true)}>Save And Publish</button>
                 </div>
               </div>
             </div>
           </>
         ) : (
-          <>
-            <div className="d-flex align-items-center justify-content-center p-4">
-              <div className="d-flex align-items-center justify-content-center bg-light p-2 border rounded" style={{width: "fit-content"}}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-plus"
-                     viewBox="0 0 16 16">
-                  <path
-                    d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-                </svg>
-                <span>New Question</span>
-              </div>
-            </div>
-            <div className="d-flex align-items-center justify-content-center gap-3 p-3 border-top">
-              <button type="button" className="btn btn-light" onClick={() => navigate('-1')}>Cancel</button>
-              <button type="button" className="btn btn-danger">Save</button>
-            </div>
-          </>
+          <NewQuestion handleSave={handleQuestionsSave} questions={questions} setQuestions={setQuestions} />
         )
       }
     </div>

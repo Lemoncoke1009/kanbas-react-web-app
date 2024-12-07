@@ -3,19 +3,39 @@ import * as client from "../client";
 import {useParams} from "react-router";
 import {useEffect, useState} from "react";
 
+function formatDate(date: string | Date) {
+  let newDate = new Date()
+  if (!date) {
+    newDate = new Date()
+  }
+  if (typeof date === 'string') {
+    newDate = new Date(date)
+  }
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const month = months[newDate.getMonth()];
+  const day = newDate.getDate();
+  let hours = newDate.getHours();
+  const minutes = newDate.getMinutes();
+
+  const isPM = hours >= 12;
+  hours = hours % 12 || 12;
+
+  return `${month} ${day} at ${hours} ${isPM ? 'pm' : 'am'}`;
+}
+
 export default function QuizDetail() {
   const [quiz, setQuiz] = useState<any>()
 
   const navigate = useNavigate()
-  const { id } = useParams();
+  const { cid, qid } = useParams();
 
   useEffect(() => {
     getQuiz()
-  }, [])
+  }, [qid])
 
   const getQuiz = async () => {
-    if (id) {
-      const quiz = await client.getQuizById(id)
+    if (qid) {
+      const quiz = await client.getQuizById(qid)
       setQuiz(quiz)
     }
   }
@@ -23,10 +43,10 @@ export default function QuizDetail() {
   return (
     <div className="d-flex flex-column" id="wd-home">
       <div className="flex-grow-1 d-flex align-content-center justify-content-center gap-4 py-3 border-bottom mb-4">
-        <div className="d-flex align-items-center justify-content-center bg-light p-2 border rounded" style={{width: "fit-content"}}>
+        <div className="d-flex align-items-center justify-content-center bg-light p-2 border rounded" style={{width: "fit-content"}} onClick={() => navigate(`/Kanbas/Courses/${cid}/Quizzes/Preview/${qid}`)}>
           <span>Preview</span>
         </div>
-        <div className="d-flex align-items-center justify-content-center bg-light p-2 border rounded gap-2" style={{width: "fit-content"}}>
+        <div className="d-flex align-items-center justify-content-center bg-light p-2 border rounded gap-2 cursor-pointer" style={{width: "fit-content"}} onClick={() => navigate(`/Kanbas/Courses/${cid}/Quizzes/New/${qid}`)}>
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pen"
                viewBox="0 0 16 16">
             <path
@@ -101,7 +121,7 @@ export default function QuizDetail() {
                 Show Correct Answers
               </div>
               <div className="col-9">
-                Immediately
+                {quiz.showCorrectAnswers ? 'Immediately' : 'No' }
               </div>
             </div>
             <div className="row g-3 align-items-center mb-3">
@@ -109,7 +129,7 @@ export default function QuizDetail() {
                 One Question at a Time
               </div>
               <div className="col-9">
-                Yes
+                {quiz.oneQuestionAtATime ? 'Yes' : 'No' }
               </div>
             </div>
             <div className="row g-3 align-items-center mb-3">
@@ -117,7 +137,7 @@ export default function QuizDetail() {
                 Require Respondus LockDown
               </div>
               <div className="col-9">
-                No
+                {quiz.lockQuestionsAfterAnswering ? 'Yes' : 'No' }
               </div>
             </div>
             <div className="row g-3 align-items-center mb-3">
@@ -133,7 +153,7 @@ export default function QuizDetail() {
                 Required to View Quiz Results
               </div>
               <div className="col-9">
-                No
+                {quiz.lockQuestionsAfterAnswering ? 'Yes' : 'No' }
               </div>
             </div>
             <div className="row g-3 align-items-center mb-3">
@@ -141,7 +161,7 @@ export default function QuizDetail() {
                 Webcam Required
               </div>
               <div className="col-9">
-                No
+                {quiz.webcamRequired ? 'Yes' : 'No' }
               </div>
             </div>
             <div className="row g-3 align-items-center mb-3">
@@ -149,7 +169,7 @@ export default function QuizDetail() {
                 Lock Questions After Answering
               </div>
               <div className="col-9">
-                No
+                {quiz.lockQuestionsAfterAnswering ? 'Yes' : 'No' }
               </div>
             </div>
 
@@ -163,12 +183,16 @@ export default function QuizDetail() {
               </tr>
               </thead>
               <tbody>
-              <tr>
-                <td>Step 21 at 1pm</td>
-                <td>Everyone</td>
-                <td>Step 21 at 11:40am</td>
-                <td>Step 21 at 1pm</td>
-              </tr>
+                {
+                  quiz.dates.map((item: any) => (
+                    <tr key={item._id}>
+                      <td>{formatDate(item.due)}</td>
+                      <td>Everyone</td>
+                      <td>{formatDate(item.availableFrom)}</td>
+                      <td>{formatDate(item.until)}</td>
+                    </tr>
+                  ))
+                }
               </tbody>
             </table>
           </div>

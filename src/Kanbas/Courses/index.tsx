@@ -10,6 +10,7 @@ import Quizzes from "./Quizzes";
 import QuizList from "./Quizzes/QuizList";
 import NewQuiz from "./Quizzes/NewQuiz";
 import QuizDetail from "./Quizzes/QuizDetail";
+import QuizPreview from "./Quizzes/QuizPreview";
 
 
 export default function Courses({ courses }: { courses: any[]; }) {
@@ -38,7 +39,9 @@ export default function Courses({ courses }: { courses: any[]; }) {
             <Route path="Quizzes" element={<Quizzes />}>
               <Route path="" element={<QuizList />} />
               <Route path="New" element={<NewQuiz />} />
-              <Route path="Detail/:id" element={<QuizDetail />} />
+              <Route path="New/:qid" element={<NewQuiz />} />
+              <Route path="Preview/:qid" element={<QuizPreview />} />
+              <Route path="Detail/:qid" element={<QuizDetail />} />
             </Route>
           </Routes>
         </div>

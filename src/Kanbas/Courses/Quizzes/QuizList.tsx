@@ -3,6 +3,26 @@ import * as client from "../client";
 import {useParams} from "react-router";
 import {useEffect, useState} from "react";
 
+function formatDate(date: string | Date) {
+  let newDate = new Date()
+  if (!date) {
+    newDate = new Date()
+  }
+  if (typeof date === 'string') {
+    newDate = new Date(date)
+  }
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const month = months[newDate.getMonth()];
+  const day = newDate.getDate();
+  let hours = newDate.getHours();
+  const minutes = newDate.getMinutes();
+
+  const isPM = hours >= 12;
+  hours = hours % 12 || 12;
+
+  return `${month} ${day} at ${hours} ${isPM ? 'pm' : 'am'}`;
+}
+
 export default function QuizList() {
   const [quizzes, setQuizzes] = useState([])
 
@@ -18,6 +38,18 @@ export default function QuizList() {
       const quizzes = await client.getQuizzesForCourse(cid)
       setQuizzes(quizzes)
     }
+  }
+
+  const publish = async (quiz: any) => {
+    await client.updateQuiz(quiz._id, {
+      publish: !quiz.publish
+    });
+    getQuizzes()
+  }
+
+  const deleteQuiz = async (quiz: any) => {
+    await client.deleteQuiz(quiz._id)
+    getQuizzes()
   }
 
   return (
@@ -69,38 +101,56 @@ export default function QuizList() {
                 <div className="d-flex flex-column">
                   <div className="fs-6 fw-bold">{quiz.name}</div>
                   <div className="d-flex align-items-center fs-14 text-dark-emphasis">
-                    <div className="fw-medium me-2">Closed</div>
+                    <div className={`fw-medium me-2 ${quiz.dates && quiz.dates.length > 1 ? 'text-danger' : ''}`}>
+                      {
+                        new Date() > quiz.until ? 'Closed' : (new Date() >= quiz.availableFrom || new Date() <= quiz.until) ? (`Available ${quiz.dates && quiz.dates.length > 1 ? 'Multiple Dates' : ''}`) : (`Not available until ${quiz.dates && quiz.dates.length > 1 ? 'Multiple Dates' : formatDate(quiz.dates[0].availableFrom)}`)
+                      }
+                    </div>
                     <div className="me-2" style={{width: 1, height: 12, background: '#333'}}></div>
                     <div className="d-flex gap-1 me-2">
                       <div className="fw-medium">Due </div>
-                      <div>Sep 21 at 1pm</div>
+                      <div className={quiz.dates && quiz.dates.length > 1 ? 'text-danger' : ''}>{ quiz.dates && quiz.dates.length > 1 ? 'Multiple Dates' : formatDate(quiz.dates[0].due) }</div>
                     </div>
                     <div className="me-2" style={{width: 1, height: 12, background: '#333'}}></div>
-                    <div className="fw-medium me-2">29 pts</div>
+                    <div className="fw-medium me-2">{quiz.questions ? quiz.questions.reduce((total: number, item: any) => total += +item.points, 0) : 0} pts</div>
                     <div className="me-2" style={{width: 1, height: 12, background: '#333'}}></div>
-                    <div className="fw-medium me-2">11 Questions</div>
+                    <div className="fw-medium me-2">{quiz.questions ? quiz.questions.length : 0} Questions</div>
                   </div>
                 </div>
               </div>
-              <div>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                     className="bi bi-check-circle-fill text-success me-2" viewBox="0 0 16 16">
-                  <path
-                    d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-                </svg>
-                <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" className="fs-4"
-                     height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" data-bs-toggle="dropdown">
-                  <circle cx="256" cy="256" r="48"></circle>
-                  <circle cx="256" cy="416" r="48"></circle>
-                  <circle cx="256" cy="96" r="48"></circle>
-                </svg>
-                <ul className="dropdown-menu">
-                  <li><a className="dropdown-item" href="#">Edit</a></li>
-                  <li><a className="dropdown-item" href="#">Delete</a></li>
-                  <li><a className="dropdown-item" href="#">Publish</a></li>
-                  <li><a className="dropdown-item" href="#">Copy</a></li>
-                  <li><a className="dropdown-item" href="#">Sort</a></li>
-                </ul>
+              <div className="d-flex align-items-center">
+                <div>
+                  {
+                    quiz.publish ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                           className="bi bi-check-circle-fill text-success me-2" viewBox="0 0 16 16">
+                        <path
+                          d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                           className="bi bi-x-circle-fill text-danger me-2" viewBox="0 0 16 16">
+                        <path
+                          d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
+                      </svg>
+                    )
+                  }
+                </div>
+                <div className="px-1 cursor-pointer" data-bs-toggle="dropdown" onClick={e => e.stopPropagation()}>
+                  <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" className="fs-4"
+                       height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="256" cy="256" r="48"></circle>
+                    <circle cx="256" cy="416" r="48"></circle>
+                    <circle cx="256" cy="96" r="48"></circle>
+                  </svg>
+                  <ul className="dropdown-menu">
+                    <li><a className="dropdown-item" onClick={() => navigate(`New/${quiz._id}`)}>Edit</a></li>
+                    <li><a className="dropdown-item" onClick={() => deleteQuiz(quiz)}>Delete</a></li>
+                    <li><a className="dropdown-item" onClick={() => publish(quiz)}>{quiz.publish ? 'Unpublish' : 'Publish'}</a></li>
+                    <li><a className="dropdown-item" href="#">Copy</a></li>
+                    <li><a className="dropdown-item" href="#">Sort</a></li>
+                  </ul>
+                </div>
               </div>
             </li>
           ))

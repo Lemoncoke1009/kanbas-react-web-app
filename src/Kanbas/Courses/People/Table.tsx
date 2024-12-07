@@ -38,5 +38,3 @@ export default function PeopleTable() {
       </table>
     </div>
 );}
-
-//final

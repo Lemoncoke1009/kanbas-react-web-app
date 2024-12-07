@@ -1,14 +1,14 @@
 import React from 'react';
 import { Routes, Route, Navigate } from "react-router";
-import Courses from "./Courses";
-import Account from "./Account";
+import Courses from './Courses';
+import Account from './Account';
 import Dashboard from "./Dashboard";
 import KanbasNavigation from "./Navigation";
 import "./styles.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import ProtectedRoute from "./Account/ProtectedRoute";
+import ProtectedRoute from './Account/ProtectedRoute';
 import * as userClient from "./Account/client";
 import * as courseClient from "./Courses/client";
 import Session from './Account/Session';

@@ -2,6 +2,7 @@ import {useNavigate} from "react-router-dom";
 import * as client from "../client";
 import {useParams} from "react-router";
 import {useEffect, useState} from "react";
+import {useSelector} from "react-redux";
 
 function formatDate(date: string | Date) {
   let newDate = new Date()
@@ -33,12 +34,15 @@ function getCurrentTime() {
   return `at ${hours}${minutes > 0 ? `:${minutes}` : ''}${isPM ? 'pm' : 'am'}`;
 }
 
-export default function QuizPreview() {
+export default function QuizStart() {
   const [quiz, setQuiz] = useState<any>()
   const [curIndex, setCurIndex] = useState(0)
   const [answers, setAnswers] = useState<any>([])
+  const [tempAnswers, setTempAnswers] = useState<any>([])
   const [testPoints, setTestPoints] = useState(0)
   const [finish, setFinish] = useState(false)
+  const [startDate, setStartDate] = useState(new Date())
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
 
   const navigate = useNavigate()
   const { cid, qid } = useParams();
@@ -57,38 +61,50 @@ export default function QuizPreview() {
           newAnswers.push('')
         }
         setAnswers(newAnswers)
+        setTempAnswers(JSON.parse(JSON.stringify(newAnswers)))
       }
     }
   }
 
   const handleNext = () => {
-    if (answers[curIndex]) {
+    if (tempAnswers[curIndex]) {
       if (curIndex < quiz.questions.length - 1) {
+        setAnswers(JSON.parse(JSON.stringify(tempAnswers)))
         setCurIndex(curIndex + 1)
       } else {
+        setAnswers(JSON.parse(JSON.stringify(tempAnswers)))
         submitQuiz()
       }
     }
   }
 
-  const submitQuiz = () => {
-    let testPoints = 0
-    for (let i = 0; i < answers.length; i++) {
-      const question = quiz.questions[i]
-      if (question.type !== 'Fill in the Blank') {
-        const matchedChoice = question.choices.find((choice: any) => choice._id === answers[i]._id)
-        if (matchedChoice && matchedChoice.isCorrectAnswer) {
-          testPoints += +question.points
-        }
-      } else {
-        const matchedChoice = question.choices.some((choice: any) => choice.value.toLowerCase() === answers[i].toLowerCase())
-        if (matchedChoice) {
-          testPoints += +question.points
+  const submitQuiz = async () => {
+    if (qid) {
+      let testPoints = 0
+      for (let i = 0; i < tempAnswers.length; i++) {
+        const question = quiz.questions[i]
+        if (question.type !== 'Fill in the Blank') {
+          const matchedChoice = question.choices.find((choice: any) => choice._id === tempAnswers[i]._id)
+          if (matchedChoice && matchedChoice.isCorrectAnswer) {
+            testPoints += +question.points
+          }
+        } else {
+          const matchedChoice = question.choices.some((choice: any) => choice.value.toLowerCase() === tempAnswers[i].toLowerCase())
+          if (matchedChoice) {
+            testPoints += +question.points
+          }
         }
       }
+      await client.createGradeForQuiz(qid, {
+        user: currentUser._id,
+        answers: tempAnswers,
+        grade: testPoints,
+        startDate,
+        endDate: new Date(),
+      })
+      setTestPoints(testPoints)
+      setFinish(true)
     }
-    setTestPoints(testPoints)
-    setFinish(true)
   }
 
   const reset = () => {
@@ -100,6 +116,7 @@ export default function QuizPreview() {
       newAnswers.push('')
     }
     setAnswers(newAnswers)
+    setTempAnswers(JSON.parse(JSON.stringify(newAnswers)))
   }
 
   const question = quiz && quiz.questions && quiz.questions.length > 0 && quiz.questions[curIndex]
@@ -110,17 +127,8 @@ export default function QuizPreview() {
         quiz && (
           <div>
             <h1>{quiz.name}</h1>
-            <div className="d-flex align-items-center gap-2 alert alert-danger" role="alert">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                   className="bi bi-exclamation-circle" viewBox="0 0 16 16">
-                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                <path
-                  d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
-              </svg>
-              <span>This is a preview of the published version of the quiz</span>
-            </div>
             <div>
-              Started: {formatDate(new Date())}
+              Started: {formatDate(startDate)}
             </div>
             {
               finish ? (
@@ -128,7 +136,13 @@ export default function QuizPreview() {
                   <div className="py-2 fs-1 border-bottom">Your Score</div>
                   <div className="p-3 text-center">
                     <div className="fs-1">{testPoints} points</div>
-                    <button type="button" className="btn btn-light border" onClick={reset}>Reset</button>
+                    {
+                      quiz.allowMultipleAttempts ? (
+                        <button type="button" className="btn btn-light border" onClick={reset}>Retry</button>
+                      ) : (
+                        <button type="button" className="btn btn-light border" onClick={() => navigate(`/Kanbas/Courses/${cid}/Quizzes/Detail/${qid}`)}>View My Grades</button>
+                      )
+                    }
                   </div>
                 </>
               ) : (
@@ -151,8 +165,8 @@ export default function QuizPreview() {
                             <div key={choice._id} className="d-flex align-items-center gap-3 mx-3 py-2 border-top">
                               {
                                 question.type !== 'Fill in the Blank' && <input className="form-check-input mt-0" type="radio" name={question._id + "-radio"} onClick={() => {
-                                  answers[curIndex] = choice
-                                  setAnswers([...answers])
+                                  tempAnswers[curIndex] = choice
+                                  setTempAnswers([...tempAnswers])
                                 }} />
                               }
                               <div className="d-flex align-items-center gap-2">
@@ -164,8 +178,8 @@ export default function QuizPreview() {
                           )) : (
                             <div className="d-flex align-items-center gap-3 mx-3 py-2 border-top">
                               <input className='form-control' onChange={(e) => {
-                                answers[curIndex] = e.target.value
-                                setAnswers([...answers])
+                                tempAnswers[curIndex] = e.target.value
+                                setTempAnswers([...tempAnswers])
                               }} />
                             </div>
                           )
@@ -187,26 +201,36 @@ export default function QuizPreview() {
               )
             }
 
-            <div className="d-flex align-items-center gap-2 border p-2 my-4 bg-body-tertiary border cursor-pointer" onClick={() => navigate(`/Kanbas/Courses/${cid}/Quizzes/New/${qid}`)}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                   className="bi bi-pencil" viewBox="0 0 16 16">
-                <path
-                  d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
-              </svg>
-              <span>Keep Editing This Quiz</span>
-            </div>
-
             <div className="fs-4">Questions</div>
             <div>
               {
                 quiz && quiz.questions && quiz.questions.map((question: any, index: number) => (
                   <div className="d-flex align-items-center gap-1 ms-3" key={question._id}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                         className="bi bi-question-circle" viewBox="0 0 16 16">
-                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                      <path
-                        d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286m1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94"/>
-                    </svg>
+                    {
+                      answers[index] ? (
+                          question.choices.find((choice: any) => choice._id === answers[index]._id) &&
+                        question.choices.find((choice: any) => choice._id === answers[index]._id).isCorrectAnswer ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                               className="bi bi-check-circle-fill text-success" viewBox="0 0 16 16">
+                            <path
+                              d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                          </svg>
+                          ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                               className="bi bi-x-circle-fill text-danger" viewBox="0 0 16 16">
+                            <path
+                              d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
+                          </svg>
+                        )
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                             className="bi bi-question-circle" viewBox="0 0 16 16">
+                          <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                          <path
+                            d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286m1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94"/>
+                        </svg>
+                      )
+                    }
                     <span className={curIndex === index ? 'text-danger fw-bold' : ''}>Question {index + 1}</span>
                   </div>
                 ))

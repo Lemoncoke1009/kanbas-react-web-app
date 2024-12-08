@@ -1,6 +1,8 @@
 import axios from "axios";
 const REMOTE_SERVER = process.env.REACT_APP_REMOTE_SERVER;
 const COURSES_API = `${REMOTE_SERVER}/api/courses`;
+const Quiz_API = `${REMOTE_SERVER}/api/quizzes`;
+const GRADE_API = `${REMOTE_SERVER}/api/grades`;
 
 export const createModuleForCourse = async (courseId: string, module: any) => {
   const response = await axios.post(

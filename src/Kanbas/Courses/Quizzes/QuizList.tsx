@@ -2,6 +2,7 @@ import {useNavigate} from "react-router-dom";
 import * as client from "../client";
 import {useParams} from "react-router";
 import {useEffect, useState} from "react";
+import {useSelector} from "react-redux";
 
 function formatDate(date: string | Date) {
   let newDate = new Date()
@@ -28,6 +29,7 @@ export default function QuizList() {
 
   const navigate = useNavigate()
   const { cid } = useParams();
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
 
   useEffect(() => {
     getQuizzes()
@@ -57,23 +59,27 @@ export default function QuizList() {
       <div className="flex-grow-1 d-flex align-content-center justify-content-between py-3 border-bottom mb-4">
         <input type="text" className="form-control w-auto" id="exampleFormControlInput1" placeholder="Search for Quiz" />
 
-        <div className="d-flex gap-2">
-          <button type="button" className="btn btn-danger" onClick={() => navigate('New')}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-plus"
-                 viewBox="0 0 16 16">
-              <path
-                d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-            </svg>
-            Quiz
-          </button>
-          <button type="button" className="btn btn-light border">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                 className="bi bi-three-dots-vertical" viewBox="0 0 16 16">
-              <path
-                d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
-            </svg>
-          </button>
-        </div>
+        {
+          currentUser.role !== 'STUDENT' && (
+            <div className="d-flex gap-2">
+              <button type="button" className="btn btn-danger" onClick={() => navigate('New')}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-plus"
+                     viewBox="0 0 16 16">
+                  <path
+                    d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                </svg>
+                Quiz
+              </button>
+              <button type="button" className="btn btn-light border">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                     className="bi bi-three-dots-vertical" viewBox="0 0 16 16">
+                  <path
+                    d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+                </svg>
+              </button>
+            </div>
+          )
+        }
       </div>
 
       <div className="wd-title p-3 ps-2 bg-body-tertiary d-flex gap-2 align-items-center border border-secondary">
@@ -86,7 +92,7 @@ export default function QuizList() {
       </div>
       <ul className="wd-lessons list-group rounded-0">
         {
-          quizzes.map((quiz: any) => (
+          (currentUser.role === 'STUDENT' ? quizzes.filter((quiz: any) => quiz.publish) : quizzes).map((quiz: any) => (
             <li key={quiz._id} className="d-flex align-items-center justify-content-between wd-lesson list-group-item p-3 ps-1" onClick={() => navigate(`Detail/${quiz._id}`)}>
               <div className="d-flex align-items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -136,21 +142,23 @@ export default function QuizList() {
                     )
                   }
                 </div>
-                <div className="px-1 cursor-pointer" data-bs-toggle="dropdown" onClick={e => e.stopPropagation()}>
-                  <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" className="fs-4"
-                       height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="256" cy="256" r="48"></circle>
-                    <circle cx="256" cy="416" r="48"></circle>
-                    <circle cx="256" cy="96" r="48"></circle>
-                  </svg>
-                  <ul className="dropdown-menu">
-                    <li><a className="dropdown-item" onClick={() => navigate(`New/${quiz._id}`)}>Edit</a></li>
-                    <li><a className="dropdown-item" onClick={() => deleteQuiz(quiz)}>Delete</a></li>
-                    <li><a className="dropdown-item" onClick={() => publish(quiz)}>{quiz.publish ? 'Unpublish' : 'Publish'}</a></li>
-                    <li><a className="dropdown-item" href="#">Copy</a></li>
-                    <li><a className="dropdown-item" href="#">Sort</a></li>
-                  </ul>
-                </div>
+                {
+                  currentUser.role !== 'STUDENT' && <div className="px-1 cursor-pointer" data-bs-toggle="dropdown" onClick={e => e.stopPropagation()}>
+                    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" className="fs-4"
+                         height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="256" cy="256" r="48"></circle>
+                      <circle cx="256" cy="416" r="48"></circle>
+                      <circle cx="256" cy="96" r="48"></circle>
+                    </svg>
+                    <ul className="dropdown-menu">
+                      <li><a className="dropdown-item" onClick={() => navigate(`New/${quiz._id}`)}>Edit</a></li>
+                      <li><a className="dropdown-item" onClick={() => deleteQuiz(quiz)}>Delete</a></li>
+                      <li><a className="dropdown-item" onClick={() => publish(quiz)}>{quiz.publish ? 'Unpublish' : 'Publish'}</a></li>
+                      <li><a className="dropdown-item" href="#">Copy</a></li>
+                      <li><a className="dropdown-item" href="#">Sort</a></li>
+                    </ul>
+                  </div>
+                }
               </div>
             </li>
           ))

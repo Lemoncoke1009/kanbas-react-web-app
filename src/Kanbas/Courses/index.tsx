@@ -11,6 +11,7 @@ import QuizList from "./Quizzes/QuizList";
 import NewQuiz from "./Quizzes/NewQuiz";
 import QuizDetail from "./Quizzes/QuizDetail";
 import QuizPreview from "./Quizzes/QuizPreview";
+import QuizStart from "./Quizzes/QuizStart";
 
 
 export default function Courses({ courses }: { courses: any[]; }) {
@@ -41,6 +42,7 @@ export default function Courses({ courses }: { courses: any[]; }) {
               <Route path="New" element={<NewQuiz />} />
               <Route path="New/:qid" element={<NewQuiz />} />
               <Route path="Preview/:qid" element={<QuizPreview />} />
+              <Route path="Testing/:qid" element={<QuizStart />} />
               <Route path="Detail/:qid" element={<QuizDetail />} />
             </Route>
           </Routes>

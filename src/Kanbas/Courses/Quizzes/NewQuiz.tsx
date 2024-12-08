@@ -60,6 +60,7 @@ export default function NewQuiz() {
 
   const save = async (publish: boolean) => {
     if (cid) {
+      let q: any
       if (editQuiz && qid) {
         await client.updateQuiz(qid, {
           name,
@@ -79,7 +80,7 @@ export default function NewQuiz() {
           publish
         });
       } else {
-        await client.createQuizForCourse(cid, {
+        q = await client.createQuizForCourse(cid, {
           name,
           content: editorData,
           quizType,
@@ -94,11 +95,12 @@ export default function NewQuiz() {
           webcamRequired,
           lockQuestionsAfterAnswering,
           dates,
-          publish
+          publish,
+          questions: []
         });
       }
       if (!publish) {
-        navigate(`/Kanbas/Courses/${cid}/Quizzes/Detail/${qid}`)
+        navigate(`/Kanbas/Courses/${cid}/Quizzes/Detail/${qid || q._id}`)
       } else {
         navigate(`/Kanbas/Courses/${cid}/Quizzes`)
       }

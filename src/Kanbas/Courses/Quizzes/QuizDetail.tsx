@@ -2,7 +2,6 @@ import {useNavigate} from "react-router-dom";
 import * as client from "../client";
 import {useParams} from "react-router";
 import {useEffect, useState} from "react";
-import {useSelector} from "react-redux";
 
 function formatDate(date: string | Date) {
   let newDate = new Date()
@@ -21,20 +20,17 @@ function formatDate(date: string | Date) {
   const isPM = hours >= 12;
   hours = hours % 12 || 12;
 
-  return `${month} ${day} at ${hours}${minutes > 0 ? `:${minutes}` : ''} ${isPM ? 'pm' : 'am'}`;
+  return `${month} ${day} at ${hours} ${isPM ? 'pm' : 'am'}`;
 }
 
 export default function QuizDetail() {
   const [quiz, setQuiz] = useState<any>()
-  const [grades, setGrades] = useState<any>([])
 
   const navigate = useNavigate()
   const { cid, qid } = useParams();
-  const { currentUser } = useSelector((state: any) => state.accountReducer);
 
   useEffect(() => {
     getQuiz()
-    getMyGrades()
   }, [qid])
 
   const getQuiz = async () => {
@@ -44,66 +40,20 @@ export default function QuizDetail() {
     }
   }
 
-  const getMyGrades = async () => {
-    if (qid) {
-      const grades = await client.getGradeForQuizAndUser(qid, currentUser._id)
-      setGrades(grades)
-    }
-  }
-
   return (
     <div className="d-flex flex-column" id="wd-home">
-      {
-        currentUser.role === 'STUDENT' && (
-          <>
-            <h2>My Grades</h2>
-            <table className="table">
-              <thead>
-              <tr>
-                <th scope="col">Start Time</th>
-                <th scope="col">End Time</th>
-                <th scope="col">Grades</th>
-              </tr>
-              </thead>
-              <tbody>
-              {
-                grades.map((item: any) => (
-                  <tr key={item._id}>
-                    <td>{formatDate(item.startDate)}</td>
-                    <td>{formatDate(item.endDate)}</td>
-                    <td>{item.grade}</td>
-                  </tr>
-                ))
-              }
-              </tbody>
-            </table>
-          </>
-        )
-      }
       <div className="flex-grow-1 d-flex align-content-center justify-content-center gap-4 py-3 border-bottom mb-4">
-        {
-          currentUser.role !== 'STUDENT' ? (
-            <>
-              <div className="d-flex align-items-center justify-content-center bg-light p-2 border rounded" style={{width: "fit-content"}} onClick={() => navigate(`/Kanbas/Courses/${cid}/Quizzes/Preview/${qid}`)}>
-                <span>Preview</span>
-              </div>
-              <div className="d-flex align-items-center justify-content-center bg-light p-2 border rounded gap-2 cursor-pointer" style={{width: "fit-content"}} onClick={() => navigate(`/Kanbas/Courses/${cid}/Quizzes/New/${qid}`)}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pen"
-                     viewBox="0 0 16 16">
-                  <path
-                    d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z"/>
-                </svg>
-                <span>Edit</span>
-              </div>
-            </>
-          ) : (
-            quiz && (quiz.allowMultipleAttempts || grades.length === 0) && (
-              <div className="d-flex align-items-center justify-content-center bg-light p-2 border rounded" style={{width: "fit-content"}} onClick={() => navigate(`/Kanbas/Courses/${cid}/Quizzes/Testing/${qid}`)}>
-                <span>{grades.length > 0 ? 'Retry' : 'Start'} Testing</span>
-              </div>
-            )
-          )
-        }
+        <div className="d-flex align-items-center justify-content-center bg-light p-2 border rounded" style={{width: "fit-content"}} onClick={() => navigate(`/Kanbas/Courses/${cid}/Quizzes/Preview/${qid}`)}>
+          <span>Preview</span>
+        </div>
+        <div className="d-flex align-items-center justify-content-center bg-light p-2 border rounded gap-2 cursor-pointer" style={{width: "fit-content"}} onClick={() => navigate(`/Kanbas/Courses/${cid}/Quizzes/New/${qid}`)}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pen"
+               viewBox="0 0 16 16">
+            <path
+              d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z"/>
+          </svg>
+          <span>Edit</span>
+        </div>
       </div>
 
       {

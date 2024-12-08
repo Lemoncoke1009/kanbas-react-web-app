@@ -51,6 +51,10 @@ export default function QuizDetail() {
     }
   }
 
+  const getTotalPoints = () => {
+    return quiz?.questions ? quiz.questions.reduce((total: number, item: any) => total + +item.points, 0) : 0;
+  }
+
   return (
     <div className="d-flex flex-column" id="wd-home">
       {
@@ -123,7 +127,7 @@ export default function QuizDetail() {
                 Points
               </div>
               <div className="col-9">
-                29
+              {getTotalPoints()}
               </div>
             </div>
             <div className="row g-3 align-items-center mb-3">
